@@ -2,18 +2,27 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
 
+const ALLOWED_ROLES = ["Student", "University", "NGO", "Mentor", "Admin"];
+
 const sanitizeUser = (user) => ({
   _id: user._id,
   name: user.name,
   email: user.email,
+  role: user.role,
 });
 
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Name, email, and password are required" });
+    }
+
+    if (role && !ALLOWED_ROLES.includes(role)) {
+      return res.status(400).json({
+        message: `Invalid role. Allowed roles: ${ALLOWED_ROLES.join(", ")}`,
+      });
     }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -27,6 +36,7 @@ const registerUser = async (req, res) => {
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
+      role: role || "Student",
     });
 
     return res.status(201).json({
