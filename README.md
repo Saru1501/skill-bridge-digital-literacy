@@ -4,3 +4,8 @@ Skill Bridge is a gamified digital literacy platform for rural youth. The system
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/SkillBridge
 JWT_SECRET=skillbridge_secret_key
+
+CLOUDINARY_CLOUD_NAME=Root
+
+CLOUDINARY_API_KEY=692537523898414
+CLOUDINARY_API_SECRET=sgUnlQWYb4N1iqWpfRTX-f3JYcw
