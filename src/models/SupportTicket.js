@@ -2,9 +2,23 @@ const mongoose = require("mongoose");
 
 const supportTicketSchema = new mongoose.Schema(
   {
-    student: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    subject: { type: String, required: true },
-    description: { type: String, required: true },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    subject: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
     status: {
       type: String,
@@ -12,8 +26,17 @@ const supportTicketSchema = new mongoose.Schema(
       default: "OPEN",
     },
 
-    resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    resolvedAt: { type: Date },
+    adminResponse: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    resolvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
   { timestamps: true }
 );

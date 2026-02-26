@@ -2,15 +2,42 @@ const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema(
   {
-    student: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    studentUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
-    courseId: { type: String, required: true }, // keep as string now (later link to Course)
-    amountLKR: { type: Number, required: true },
+    amountLKR: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
 
-    method: { type: String, enum: ["CARD"], default: "CARD" },
-    status: { type: String, enum: ["CREATED", "PAID", "FAILED"], default: "CREATED" },
+    currency: {
+      type: String,
+      default: "lkr",
+      lowercase: true,
+      trim: true,
+    },
 
-    stripePaymentIntentId: { type: String },
+    purpose: {
+      type: String,
+      trim: true,
+      default: "course_payment",
+    },
+
+    stripePaymentIntentId: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    status: {
+      type: String,
+      enum: ["CREATED", "SUCCEEDED", "FAILED"],
+      default: "CREATED",
+    },
   },
   { timestamps: true }
 );

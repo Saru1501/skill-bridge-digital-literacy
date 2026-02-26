@@ -2,13 +2,23 @@ const mongoose = require("mongoose");
 
 const sponsorshipApplicationSchema = new mongoose.Schema(
   {
-    student: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    program: { type: mongoose.Schema.Types.ObjectId, ref: "SponsorshipProgram", required: true },
+    program: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SponsorshipProgram",
+      required: true,
+    },
 
-    fullName: { type: String, required: true },
-    nic: { type: String, required: true }, // Sri Lanka NIC
-    phone: { type: String, required: true },
-    reason: { type: String, required: true },
+    studentUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    reason: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
     status: {
       type: String,
@@ -16,9 +26,25 @@ const sponsorshipApplicationSchema = new mongoose.Schema(
       default: "PENDING",
     },
 
-    sponsorshipCode: { type: String }, // issued on approval
-    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // NGO/Admin
-    reviewedAt: { type: Date },
+    // Generated when APPROVED
+    sponsorshipCode: {
+      type: String,
+      unique: true,
+      sparse: true, // allows many null values
+      trim: true,
+    },
+
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    reviewNote: {
+      type: String,
+      trim: true,
+      default: "",
+    },
   },
   { timestamps: true }
 );
