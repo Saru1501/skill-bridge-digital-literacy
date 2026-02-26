@@ -3,51 +3,51 @@ const Payment = require("../models/Payment");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// STUDENT create payment intent
-exports.createPaymentIntent = async (req, res) => {
-  const { courseId, amountLKR } = req.body;
-  if (!courseId || !amountLKR) {
-    return res.status(400).json({ message: "courseId and amountLKR required" });
+// Student: create payment intent
+const createPaymentIntent = async (req, res) => {
+  try {
+    const { amountLKR, purpose } = req.body;
+
+    if (amountLKR === undefined || amountLKR === null) {
+      return res.status(400).json({ message: "amountLKR is required" });
+    }
+
+    const amount = Number(amountLKR);
+    if (Number.isNaN(amount) || amount < 0) {
+      return res.status(400).json({ message: "amountLKR must be a number >= 0" });
+    }
+
+    // Stripe uses smallest currency unit. LKR is typically treated as 2 decimal places by Stripe,
+    // but for simplicity we’ll treat input as a whole amount and convert to cents-like unit.
+    const stripeAmount = Math.round(amount * 100);
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: stripeAmount,
+      currency: "lkr",
+      metadata: {
+        studentUserId: String(req.user._id),
+        purpose: purpose || "course_payment",
+      },
+    });
+
+    const payment = await Payment.create({
+      studentUser: req.user._id,
+      amountLKR: amount,
+      currency: "lkr",
+      purpose: purpose || "course_payment",
+      stripePaymentIntentId: paymentIntent.id,
+      status: "CREATED",
+    });
+
+    return res.status(201).json({
+      message: "Payment intent created",
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      payment,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || "Server error" });
   }
-
-  // Stripe works in smallest currency unit. LKR has no decimals => use amountLKR as is.
-  const intent = await stripe.paymentIntents.create({
-    amount: Number(amountLKR),
-    currency: "lkr",
-    automatic_payment_methods: { enabled: true },
-    metadata: {
-      courseId,
-      studentId: req.user._id.toString(),
-    },
-  });
-
-  const payment = await Payment.create({
-    student: req.user._id,
-    courseId,
-    amountLKR,
-    status: "CREATED",
-    stripePaymentIntentId: intent.id,
-  });
-
-  res.status(201).json({
-    clientSecret: intent.client_secret,
-    paymentId: payment._id,
-    stripePaymentIntentId: intent.id,
-  });
 };
 
-// STUDENT confirm payment success (simplified)
-exports.markPaid = async (req, res) => {
-  const payment = await Payment.findById(req.params.id);
-  if (!payment) return res.status(404).json({ message: "Payment not found" });
-
-  // only owner can mark it
-  if (payment.student.toString() !== req.user._id.toString()) {
-    return res.status(403).json({ message: "Forbidden" });
-  }
-
-  payment.status = "PAID";
-  await payment.save();
-
-  res.json(payment);
-};
+module.exports = { createPaymentIntent };

@@ -9,8 +9,8 @@ const authRoutes = require("./src/routes/authRoutes");
 
 // Component 4 routes (you will create these files)
 const sponsorshipRoutes = require("./src/routes/sponsorshipRoutes");
-const paymentRoutes = require("./src/routes/paymentRoutes");
 const ticketRoutes = require("./src/routes/ticketRoutes");
+const paymentRoutes = require("./src/routes/paymentRoutes");
 
 const app = express();
 
@@ -32,8 +32,8 @@ app.use("/api/auth", authRoutes);
 
 // Component 4 — Sponsorship, Payment & Support
 app.use("/api/sponsorship", sponsorshipRoutes);
-app.use("/api/payments", paymentRoutes);
 app.use("/api/tickets", ticketRoutes);
+app.use("/api/payments", paymentRoutes);
 
 // Optional: 404 handler for unknown routes
 app.use((req, res) => {
