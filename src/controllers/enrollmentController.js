@@ -7,7 +7,7 @@ const enrollCourse = async (req, res) => {
     const course = await Course.findById(req.params.courseId);
     if (!course) return res.status(404).json({ success: false, message: "Course not found" });
     if (!course.isPublished) return res.status(400).json({ success: false, message: "Course is not available" });
-    const existing = await Enrollment.findOne({ student: req.user._id, course: req.params.courseId });
+    const existing = await Enrollment.findOne({ student: req.user._id, course: req.params.courseId, isActive: true });
     if (existing) return res.status(400).json({ success: false, message: "Already enrolled" });
     const enrollment = await Enrollment.create({ student: req.user._id, course: req.params.courseId });
     await Progress.create({ student: req.user._id, course: req.params.courseId });
@@ -31,7 +31,7 @@ const getMyEnrollments = async (req, res) => {
 
 const checkEnrollment = async (req, res) => {
   try {
-    const enrollment = await Enrollment.findOne({ student: req.user._id, course: req.params.courseId });
+    const enrollment = await Enrollment.findOne({ student: req.user._id, course: req.params.courseId, isActive: true });
     res.status(200).json({ success: true, isEnrolled: !!enrollment, data: enrollment });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
