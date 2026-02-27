@@ -44,3 +44,17 @@ const startServer = async () => {
 };
 
 startServer();
+
+const badgeRoutes = require("./src/routes/badgeRoutes");
+const pointsRoutes = require("./src/routes/pointsRoutes");
+const certificateRoutes = require("./src/routes/certificateRoutes");
+const leaderboardRoutes = require("./src/routes/leaderboardRoutes");
+const feeReductionRoutes = require("./src/routes/feeReductionRoutes");
+const gamificationRoutes = require("./src/routes/gamificationRoutes");
+ 
+app.use("/api/badges", badgeRoutes);
+app.use("/api/points", pointsRoutes);
+app.use("/api/certificates", certificateRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/fee-reduction", feeReductionRoutes);
+app.use("/api/gamification", gamificationRoutes);
