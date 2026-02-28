@@ -5,6 +5,7 @@ const connectDB = require("./src/config/db");
 
 // Route imports
 const authRoutes = require("./src/routes/authRoutes");
+//component 1 routes
 const courseRoutes = require("./src/routes/courseRoutes");
 const lessonRoutes = require("./src/routes/lessonRoutes");
 const enrollmentRoutes = require("./src/routes/enrollmentRoutes");
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 
 // Mount routes
 app.use("/api/auth", authRoutes);
+//component 1
 app.use("/api/courses", courseRoutes);
 app.use("/api/lessons", lessonRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
