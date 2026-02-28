@@ -6,7 +6,11 @@ MONGO_URI=mongodb://localhost:27017/SkillBridge
 JWT_SECRET=skillbridge_secret_key
 
 
+<<<<<<< HEAD
 Skill Bridge – Component 4  
+=======
+### Skill Bridge – Component 4  
+>>>>>>> Sponsorship,-Payment-&-Support-Management
 Sponsorship & Support Management  
 
 📌 Component Overview
@@ -166,5 +170,8 @@ Name: Sarumathy.V
 Component: Sponsorship & Support Management  
 Module: SE3040 – Application Frameworks  
 University: SLIIT  
+<<<<<<< HEAD
 >>>>>>> 7c5c975 (docs(component-4): add complete README with API documentation and setup guide)
 >>>>>>> 7417e38 (fix: resolve dependency conflicts after rebase)
+=======
+>>>>>>> Sponsorship,-Payment-&-Support-Management
