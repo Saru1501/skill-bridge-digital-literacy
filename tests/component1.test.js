@@ -2,6 +2,30 @@ const request = require("supertest");
 const mongoose = require("mongoose");
 const app = require("../server");
 
+// Wait for DB to be ready before any tests run
+beforeAll(async () => {
+  await app.dbReady;
+});
+
+afterAll(async () => {
+  // Clean up test data
+  try {
+    await mongoose.connection.collection("users").deleteMany({
+      email: { $in: ["admin_test@gmail.com", "student_test@gmail.com", "other@gmail.com"] },
+    });
+    if (courseId) {
+      const oid = new mongoose.Types.ObjectId(courseId);
+      await mongoose.connection.collection("courses").deleteOne({ _id: oid });
+      await mongoose.connection.collection("lessons").deleteMany({ course: oid });
+      await mongoose.connection.collection("enrollments").deleteMany({ course: oid });
+      await mongoose.connection.collection("progresses").deleteMany({ course: oid });
+      await mongoose.connection.collection("savedcourses").deleteMany({ course: oid });
+    }
+  } catch (e) {
+    // ignore cleanup errors
+  }
+});
+
 // ============================================================
 // TEST DATA
 // ============================================================
@@ -41,27 +65,6 @@ const testLesson = {
 };
 
 // ============================================================
-// SETUP & TEARDOWN
-// ============================================================
-beforeAll(async () => {
-  await mongoose.connect(process.env.MONGO_URI);
-});
-
-afterAll(async () => {
-  await mongoose.connection.collection("users").deleteMany({
-    email: { $in: [adminUser.email, studentUser.email, "other@gmail.com"] },
-  });
-  if (courseId) {
-    await mongoose.connection.collection("courses").deleteOne({ _id: new mongoose.Types.ObjectId(courseId) });
-    await mongoose.connection.collection("lessons").deleteMany({ course: new mongoose.Types.ObjectId(courseId) });
-    await mongoose.connection.collection("enrollments").deleteMany({ course: new mongoose.Types.ObjectId(courseId) });
-    await mongoose.connection.collection("progresses").deleteMany({ course: new mongoose.Types.ObjectId(courseId) });
-    await mongoose.connection.collection("savedcourses").deleteMany({ course: new mongoose.Types.ObjectId(courseId) });
-  }
-  await mongoose.connection.close();
-});
-
-// ============================================================
 // 1. AUTH TESTS
 // ============================================================
 describe("1. AUTH - Register & Login", () => {
@@ -97,6 +100,8 @@ describe("1. AUTH - Register & Login", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.token).toBeDefined();
+    // refresh token to ensure latest
+    adminToken = res.body.token;
   });
 
   test("Fail login with wrong password", async () => {
