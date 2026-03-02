@@ -1,27 +1,38 @@
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
-  const mongoUri = process.env.MONGO_URI;
+  const mongoUris = [process.env.MONGO_URI, process.env.MONGO_URI_DIRECT].filter(Boolean);
 
-  if (!mongoUri) {
-    console.error("MongoDB Connection Failed: MONGO_URI is missing in .env");
+  if (mongoUris.length === 0) {
+    console.error("MongoDB Connection Failed: set MONGO_URI or MONGO_URI_DIRECT in .env");
     process.exit(1);
   }
 
-  try {
-    await mongoose.connect(mongoUri);
-    console.log("Connected DB:", mongoose.connection.name);
-  } catch (error) {
-    if (error.message.includes("querySrv ECONNREFUSED")) {
-      console.error(
-        "MongoDB Connection Failed: DNS SRV lookup was refused. If you are using Atlas, re-copy the full URI from Atlas > Connect > Drivers and verify your network/DNS access."
-      );
-    } else {
-      console.error("MongoDB Connection Failed:", error.message);
+  let lastError;
+
+  for (const uri of mongoUris) {
+    try {
+      await mongoose.connect(uri, { serverSelectionTimeoutMS: 7000 });
+      console.log("Connected DB:", mongoose.connection.name);
+      return;
+    } catch (error) {
+      lastError = error;
+      console.error(`MongoDB connect failed for ${uri}:`, error.message);
+
+      // ensure next attempt starts cleanly
+      if (mongoose.connection.readyState !== 0) {
+        await mongoose.disconnect().catch(() => {});
+      }
     }
-
-    process.exit(1);
   }
+
+  if (lastError?.message?.includes("querySrv ECONNREFUSED")) {
+    console.error(
+      "MongoDB Connection Failed: DNS SRV lookup was refused. Atlas DNS may be blocked. Using MONGO_URI_DIRECT (mongodb://127.0.0.1:27017/...) is recommended for local dev."
+    );
+  }
+
+  process.exit(1);
 };
 
 module.exports = connectDB;

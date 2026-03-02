@@ -3,7 +3,7 @@ const Quiz = require('../models/Quiz');
 exports.getQuizzesByCourse = async (req, res) => {
   try {
     const filter = { course: req.query.course };
-    if (req.user.role === 'student') filter.isPublished = true;
+    if (String(req.user.role).toLowerCase() === 'student') filter.isPublished = true;
     const quizzes = await Quiz.find(filter).select('-questions.correctAnswer'); // hide answers from student list
     res.json({ success: true, data: quizzes });
   } catch (err) {
@@ -17,7 +17,7 @@ exports.getQuizById = async (req, res) => {
     if (!quiz) return res.status(404).json({ success: false, message: 'Quiz not found' });
 
     // strip correct answers for students
-    if (req.user.role === 'student') {
+    if (String(req.user.role).toLowerCase() === 'student') {
       quiz = quiz.toObject();
       quiz.questions = quiz.questions.map(({ correctAnswer, ...rest }) => rest);
     }

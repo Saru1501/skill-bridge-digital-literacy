@@ -35,7 +35,10 @@ const quizSchema = new mongoose.Schema({
   unlockAfterMission: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Mission',
-    default: null
+    default: null,
+
+    googleFormId:  { type: String, default: null },
+    googleFormUrl: { type: String, default: null },
   }
 }, { timestamps: true });
 

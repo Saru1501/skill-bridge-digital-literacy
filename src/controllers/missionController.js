@@ -5,7 +5,7 @@ exports.getMissionsByCourse = async (req, res) => {
   try {
     const { course } = req.query;
     const filter = { course };
-    if (req.user.role === 'student') filter.isPublished = true;
+    if (String(req.user.role).toLowerCase() === 'student') filter.isPublished = true;
 
     const missions = await Mission.find(filter).sort({ order: 1 });
     res.json({ success: true, data: missions });
