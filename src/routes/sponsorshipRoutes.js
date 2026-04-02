@@ -7,6 +7,8 @@ const {
   listNgoApplications,
   reviewApplication,
   redeemSponsorshipCode,
+  deleteProgram,
+  deleteApplication
 } = require("../controllers/sponsorshipController");
 
 const router = express.Router();
@@ -27,5 +29,21 @@ router.put(
 
 // Redeem
 router.post("/redeem", protect, authorize("Student"), redeemSponsorshipCode);
+
+// Delete program (NGO)
+router.delete(
+  "/programs/:id",
+  protect,
+  authorize("NGO"),
+  deleteProgram
+);
+
+// Delete application (Student)
+router.delete(
+  "/applications/:id",
+  protect,
+  authorize("Student"),
+  deleteApplication
+);
 
 module.exports = router;

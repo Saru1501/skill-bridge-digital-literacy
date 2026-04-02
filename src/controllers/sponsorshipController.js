@@ -167,10 +167,69 @@ const redeemSponsorshipCode = async (req, res) => {
   }
 };
 
+// NGO: delete sponsorship program
+const deleteProgram = async (req, res) => {
+  try {
+    const program = await SponsorshipProgram.findById(req.params.id);
+
+    if (!program) {
+      return res.status(404).json({ message: "Program not found" });
+    }
+
+    // Ensure NGO owns this program
+    if (String(program.ngoUser) !== String(req.user._id)) {
+      return res.status(403).json({ message: "Forbidden: not your program" });
+    }
+
+    await program.deleteOne();
+
+    return res.status(200).json({
+      message: "Program deleted successfully",
+    });
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message || "Server error" });
+  }
+};
+
+// Student: delete their sponsorship application
+const deleteApplication = async (req, res) => {
+  try {
+    const application = await SponsorshipApplication.findById(req.params.id);
+
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    // Ensure the student owns the application
+    if (String(application.studentUser) !== String(req.user._id)) {
+      return res.status(403).json({ message: "Forbidden: not your application" });
+    }
+
+    // Only allow deletion if still pending
+    if (application.status !== "PENDING") {
+      return res.status(400).json({
+        message: "Cannot delete application after review",
+      });
+    }
+
+    await application.deleteOne();
+
+    return res.status(200).json({
+      message: "Application deleted successfully",
+    });
+
+  } catch (error) {
+    return res.status(500).json({ message: error.message || "Server error" });
+  }
+};
+
 module.exports = {
   createProgram,
   listPrograms,
   applyForSponsorship,
+  deleteProgram,
+  deleteApplication,
   listNgoApplications,
   reviewApplication,
   redeemSponsorshipCode,
