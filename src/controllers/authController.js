@@ -37,6 +37,7 @@ const registerUser = async (req, res) => {
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
+      //role: role ? role.trim() : "student",  
       role: role ? role.toLowerCase() : "student",
     });
 
