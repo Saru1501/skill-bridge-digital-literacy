@@ -1,6 +1,7 @@
 const Progress = require("../models/Progress");
 const Enrollment = require("../models/Enrollment");
 const Course = require("../models/Course");
+const { handleCourseCompletion } = require("./gamificationController");
 
 const updateLessonProgress = async (req, res) => {
   try {
@@ -21,6 +22,7 @@ const updateLessonProgress = async (req, res) => {
       enrollment.completionStatus = "completed";
       enrollment.completedAt = Date.now();
       await enrollment.save();
+      await handleCourseCompletion({ body: { studentId: req.user._id, courseId } }, { status: () => ({ json: () => {} }) });
     } else if (progress.completedLessons.length > 0) {
       enrollment.completionStatus = "in_progress";
       await enrollment.save();
