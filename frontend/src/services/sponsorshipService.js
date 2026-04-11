@@ -9,3 +9,8 @@ export const applyForSponsorship = async (formData) => {
   const response = await api.post("/sponsorship/applications", formData);
   return response.data;
 };
+
+export const redeemSponsorshipCode = async (formData) => {
+  const response = await api.post("/sponsorship/redeem", formData);
+  return response.data;
+};
