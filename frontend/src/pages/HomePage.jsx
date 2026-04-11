@@ -11,123 +11,93 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
-      {/* Header */}
-      <header className="flex justify-between items-center p-6">
-        <div className="text-2xl font-bold text-white">SkillBridge</div>
-        <div className="flex gap-4 items-center">
-          {isAuthenticated ? (
-            <>
-              <button
-                onClick={() => {
-                  const role = user?.role?.toLowerCase();
-                  if (role === "admin") navigate("/admin");
-                  else if (role === "ngo") navigate("/ngo");
-                  else navigate("/student");
-                }}
-                className="px-6 py-2 bg-white text-indigo-900 font-semibold rounded-lg hover:bg-indigo-50 transition"
-              >
-                Dashboard
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className="px-6 py-2 text-white font-medium hover:text-indigo-200 transition border border-white/30 rounded-lg"
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/register"
-                className="px-6 py-2 bg-pink-500 text-white font-semibold rounded-lg hover:bg-pink-600 transition"
-              >
-                Join Now
-              </Link>
-            </>
-          )}
+    <div className="min-h-screen" style={{ backgroundColor: '#f6f6f3' }}>
+      {/* Navigation */}
+      <nav className="nav-glass" style={{ position: 'sticky', top: 0, zIndex: 100 }}>
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
+          <div style={{ fontSize: '24px', fontWeight: 700, color: '#ff385c' }}>SkillBridge</div>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            {isAuthenticated ? (
+              <>
+                <Link 
+                  to="/student" 
+                  style={{ padding: '10px 16px', borderRadius: '20px', backgroundColor: '#e5e5e0', color: '#211922', fontWeight: 500 }}
+                >
+                  Dashboard
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  style={{ padding: '10px 20px', borderRadius: '20px', backgroundColor: '#e60023', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 500 }}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" style={{ padding: '10px 20px', borderRadius: '20px', color: '#211922', fontWeight: 500 }}>
+                  Log in
+                </Link>
+                <Link 
+                  to="/register" 
+                  style={{ padding: '10px 20px', borderRadius: '20px', backgroundColor: '#e60023', color: 'white', fontWeight: 500 }}
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
+          </div>
         </div>
-      </header>
+      </nav>
 
       {/* Hero Section */}
-      <main className="container mx-auto px-6 py-16">
-        <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Learn. Grow. Achieve.
-          </h1>
-          <p className="text-xl text-indigo-200 mb-10">
-            Digital literacy platform for rural youth. Gamified learning with courses, 
-            quizzes, and rewards. Get sponsored by NGOs and earn certificates!
-          </p>
-          {!isAuthenticated && (
-            <div className="flex justify-center gap-4">
-              <Link
-                to="/register"
-                className="px-8 py-4 bg-pink-500 text-white font-semibold rounded-xl hover:bg-pink-600 transition text-lg"
-              >
-                Get Started Free
-              </Link>
-              <Link
-                to="/login"
-                className="px-8 py-4 border-2 border-white text-white font-semibold rounded-xl hover:bg-white/10 transition text-lg"
-              >
-                Login
-              </Link>
-            </div>
-          )}
-        </div>
+      <main className="container" style={{ padding: '60px 16px', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '56px', fontWeight: 700, color: '#211922', marginBottom: '16px', letterSpacing: '-0.02em' }}>
+          Master Digital Skills
+        </h1>
+        <p style={{ fontSize: '18px', color: '#62625b', marginBottom: '32px', maxWidth: '600px', margin: '0 auto 32px' }}>
+          Learn digital literacy, earn rewards, and build your future with SkillBridge.
+        </p>
+        
+        {!isAuthenticated && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
+            <Link 
+              to="/register" 
+              style={{ padding: '14px 28px', borderRadius: '24px', backgroundColor: '#e60023', color: 'white', fontWeight: 600, fontSize: '16px' }}
+            >
+              Explore now
+            </Link>
+            <Link 
+              to="/login" 
+              style={{ padding: '14px 28px', borderRadius: '24px', backgroundColor: '#e5e5e0', color: '#211922', fontWeight: 600, fontSize: '16px' }}
+            >
+              Log in
+            </Link>
+          </div>
+        )}
 
         {/* Features */}
-        <div className="grid md:grid-cols-3 gap-8 mt-20">
-          <div className="bg-white/10 backdrop-blur rounded-2xl p-8 text-white">
-            <div className="text-4xl mb-4">📚</div>
-            <h3 className="text-xl font-bold mb-2">Learn Anywhere</h3>
-            <p className="text-indigo-200">
-              Access courses offline and sync progress. Learn at your own pace with downloadable resources.
-            </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '60px' }}>
+          <div className="card" style={{ textAlign: 'left', padding: '24px' }}>
+            <div style={{ fontSize: '40px', marginBottom: '16px' }}>📚</div>
+            <h3 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '8px' }}>Learn New Skills</h3>
+            <p style={{ color: '#62625b' }}>Access courses on digital literacy, programming, and more.</p>
           </div>
-          <div className="bg-white/10 backdrop-blur rounded-2xl p-8 text-white">
-            <div className="text-4xl mb-4">🏆</div>
-            <h3 className="text-xl font-bold mb-2">Earn Rewards</h3>
-            <p className="text-indigo-200">
-              Earn points, badges, and certificates. Climb the leaderboard and get fee reductions!
-            </p>
+          <div className="card" style={{ textAlign: 'left', padding: '24px' }}>
+            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🏆</div>
+            <h3 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '8px' }}>Earn Rewards</h3>
+            <p style={{ color: '#62625b' }}>Collect points, badges, and certificates as you learn.</p>
           </div>
-          <div className="bg-white/10 backdrop-blur rounded-2xl p-8 text-white">
-            <div className="text-4xl mb-4">🤝</div>
-            <h3 className="text-xl font-bold mb-2">Get Sponsored</h3>
-            <p className="text-indigo-200">
-              Apply for NGO sponsorship. Get financial support for your learning journey.
-            </p>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="flex justify-center gap-16 mt-20 text-white">
-          <div className="text-center">
-            <div className="text-4xl font-bold">10K+</div>
-            <div className="text-indigo-200">Students</div>
-          </div>
-          <div className="text-center">
-            <div className="text-4xl font-bold">100+</div>
-            <div className="text-indigo-200">Courses</div>
-          </div>
-          <div className="text-center">
-            <div className="text-4xl font-bold">50+</div>
-            <div className="text-indigo-200">NGOs</div>
+          <div className="card" style={{ textAlign: 'left', padding: '24px' }}>
+            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🤝</div>
+            <h3 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '8px' }}>Get Sponsored</h3>
+            <p style={{ color: '#62625b' }}>Apply for NGO sponsorship to fund your education.</p>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="text-center text-indigo-300 py-8">
-        © 2024 SkillBridge Digital Literacy. All rights reserved.
+      <footer style={{ backgroundColor: '#f6f6f3', padding: '32px 16px', textAlign: 'center', borderTop: '1px solid #e5e5e0' }}>
+        <p style={{ color: '#91918c', fontSize: '14px' }}>© 2024 SkillBridge. All rights reserved.</p>
       </footer>
     </div>
   );

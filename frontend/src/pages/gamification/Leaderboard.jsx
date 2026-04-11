@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { gamificationService } from "../../services/gamificationService";
-import Navbar from "../../components/Navbar";
+import useAuth from "../../hooks/useAuth";
 
 export default function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState([]);
   const [myRank, setMyRank] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -31,72 +39,74 @@ export default function Leaderboard() {
     if (rank === 1) return "🥇";
     if (rank === 2) return "🥈";
     if (rank === 3) return "🥉";
-    return `#${rank}`;
-  };
-
-  const cardStyle = {
-    backgroundColor: '#ffffff',
-    borderRadius: '20px',
-    boxShadow: 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.1) 0px 4px 8px'
+    return rank;
   };
 
   const getRankStyle = (rank) => {
-    if (rank === 1) return { background: 'linear-gradient(135deg, #ffd700 0%, #ffb700 100%)', color: '#222222' };
-    if (rank === 2) return { background: 'linear-gradient(135deg, #c0c0c0 0%, #a0a0a0 100%)', color: '#222222' };
-    if (rank === 3) return { background: 'linear-gradient(135deg, #cd7f32 0%, #b87333 100%)', color: '#222222' };
-    return { backgroundColor: '#f2f2f2', color: '#222222' };
+    if (rank === 1) return { backgroundColor: '#fff5f5', border: '2px solid #e60023' };
+    if (rank === 2) return { backgroundColor: '#f6f6f3' };
+    if (rank === 3) return { backgroundColor: '#fff8f0' };
+    return { backgroundColor: 'white' };
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#ffffff' }}>
-      <Navbar />
+    <div className="min-h-screen" style={{ backgroundColor: '#f6f6f3' }}>
+      <nav className="nav-glass">
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+            <Link to="/student" style={{ fontSize: '20px', fontWeight: 700, color: '#ff385c' }}>SkillBridge</Link>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Link to="/student" style={{ padding: '8px 16px', borderRadius: '20px', color: '#211922', fontWeight: 500, fontSize: '14px' }}>Home</Link>
+              <Link to="/student/gamification" style={{ padding: '8px 16px', borderRadius: '20px', color: '#211922', fontWeight: 500, fontSize: '14px' }}>Activity</Link>
+              <Link to="/student/leaderboard" style={{ padding: '8px 16px', borderRadius: '20px', backgroundColor: '#e5e5e0', color: '#211922', fontWeight: 600, fontSize: '14px' }}>Leaderboard</Link>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ color: '#62625b', fontSize: '14px' }}>{user?.name}</span>
+            <button onClick={handleLogout} className="btn-primary" style={{ padding: '8px 16px', fontSize: '13px' }}>Logout</button>
+          </div>
+        </div>
+      </nav>
 
-      <div className="p-6 max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: '#222222', letterSpacing: '-0.18px' }}>
-          🏆 Leaderboard
-        </h2>
+      <div className="container" style={{ padding: '32px 16px', maxWidth: '600px' }}>
+        <h2 style={{ fontSize: '32px', fontWeight: 600, textAlign: 'center', marginBottom: '24px' }}>🏆 Leaderboard</h2>
 
         {myRank && (
-          <div 
-            className="p-6 mb-6 text-center"
-            style={{ 
-              background: 'linear-gradient(135deg, #ff385c 0%, #e00b41 100%)',
-              borderRadius: '20px',
-              color: '#ffffff'
-            }}
-          >
-            <div style={{ fontSize: '14px', opacity: 0.8 }}>Your Current Rank</div>
-            <div className="text-5xl font-bold mt-2">#{myRank.rank || "-"}</div>
-            <div className="mt-2" style={{ opacity: 0.8 }}>{myRank.totalPoints} points</div>
+          <div className="card" style={{ textAlign: 'center', padding: '32px', marginBottom: '24px', backgroundColor: '#e60023', color: 'white' }}>
+            <div style={{ fontSize: '14px', opacity: 0.9 }}>Your Current Rank</div>
+            <div style={{ fontSize: '56px', fontWeight: 700 }}>#{myRank.rank || "-"}</div>
+            <div style={{ fontSize: '16px', opacity: 0.9 }}>{myRank.totalPoints} points</div>
           </div>
         )}
 
         {loading ? (
-          <div className="text-center py-8" style={{ color: '#6a6a6a' }}>Loading...</div>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#62625b' }}>Loading...</div>
         ) : (
-          <div style={{ ...cardStyle, overflow: 'hidden' }}>
+          <div className="card" style={{ overflow: 'hidden' }}>
             {leaderboard.map((entry) => (
               <div
                 key={entry._id}
-                className="flex items-center p-4"
-                style={{ 
-                  borderBottom: '1px solid #f2f2f2',
-                  ...getRankStyle(entry.rank)
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '16px',
+                  borderBottom: '1px solid #e5e5e0',
+                  ...getRankStyle(entry.rank),
                 }}
               >
-                <div className="w-12 text-center text-xl font-bold">{getRankBadge(entry.rank)}</div>
-                <div className="flex-1 ml-4">
-                  <div className="font-semibold" style={{ fontSize: '14px' }}>{entry.student?.name || "Unknown"}</div>
-                  <div style={{ fontSize: '12px', color: '#6a6a6a' }}>{entry.student?.email}</div>
+                <div style={{ width: '48px', textAlign: 'center', fontSize: '24px', fontWeight: 700 }}>{getRankBadge(entry.rank)}</div>
+                <div style={{ flex: 1, marginLeft: '16px' }}>
+                  <div style={{ fontWeight: 600, color: '#211922' }}>{entry.student?.name || "Unknown"}</div>
+                  <div style={{ fontSize: '13px', color: '#62625b' }}>{entry.student?.email}</div>
                 </div>
-                <div className="text-xl font-bold" style={{ color: '#ff385c' }}>{entry.totalPoints}</div>
+                <div style={{ fontSize: '20px', fontWeight: 700, color: '#e60023' }}>{entry.totalPoints}</div>
               </div>
             ))}
           </div>
         )}
 
         {leaderboard.length === 0 && !loading && (
-          <div className="text-center py-12" style={{ color: '#6a6a6a' }}>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#62625b' }}>
             No users on the leaderboard yet.
           </div>
         )}

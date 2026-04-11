@@ -41,31 +41,34 @@ export default function RegisterPage() {
       return;
     }
 
-    // Read from localStorage after state update
     setTimeout(() => {
       navigate(getDashboardPath(formData.role));
     }, 50);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 px-4">
-      <div className="w-full max-w-md bg-white/10 backdrop-blur rounded-2xl shadow-xl p-8">
-        <h1 className="text-3xl font-bold mb-6 text-center text-white">Create Account</h1>
+    <div className="min-h-screen" style={{ backgroundColor: '#f6f6f3', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '40px', maxWidth: '400px', width: '100%', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ fontSize: '48px', fontWeight: 700, color: '#ff385c', marginBottom: '16px' }}>SkillBridge</div>
+          <h1 style={{ fontSize: '28px', fontWeight: 600, color: '#211922' }}>Create an account</h1>
+          <p style={{ color: '#62625b', marginTop: '8px' }}>Join us and start learning today</p>
+        </div>
 
         {error && (
-          <p className="mb-4 text-sm text-red-300 bg-red-500/20 p-3 rounded-lg">
+          <div style={{ backgroundColor: '#fff0f0', color: '#9e0a0a', padding: '12px', borderRadius: '12px', marginBottom: '16px', fontSize: '14px' }}>
             {error}
-          </p>
+          </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <input
             type="text"
             name="name"
             placeholder="Full name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full border border-white/20 bg-white/10 rounded-lg px-4 py-3 text-white placeholder-white/50"
+            style={{ width: '100%' }}
             required
           />
 
@@ -75,7 +78,7 @@ export default function RegisterPage() {
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full border border-white/20 bg-white/10 rounded-lg px-4 py-3 text-white placeholder-white/50"
+            style={{ width: '100%' }}
             required
           />
 
@@ -85,7 +88,7 @@ export default function RegisterPage() {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full border border-white/20 bg-white/10 rounded-lg px-4 py-3 text-white placeholder-white/50"
+            style={{ width: '100%' }}
             required
           />
 
@@ -93,28 +96,27 @@ export default function RegisterPage() {
             name="role"
             value={formData.role}
             onChange={handleChange}
-            className="w-full border border-white/20 bg-white/10 rounded-lg px-4 py-3 text-white"
+            style={{ width: '100%' }}
           >
-            <option value="student" className="text-black">Student</option>
-            <option value="ngo" className="text-black">NGO</option>
-            <option value="admin" className="text-black">Admin</option>
+            <option value="student">Student</option>
+            <option value="ngo">NGO</option>
+            <option value="admin">Admin</option>
           </select>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-pink-500 text-white rounded-lg py-3 font-semibold hover:bg-pink-600 transition disabled:opacity-50"
+            className="btn-primary"
+            style={{ width: '100%', padding: '14px', fontSize: '16px' }}
           >
-            {loading ? "Creating Account..." : "Sign Up"}
+            {loading ? "Creating account..." : "Create account"}
           </button>
         </form>
 
-        <p className="mt-6 text-sm text-center text-white/70">
-          Already have an account?{" "}
-          <Link to="/login" className="font-semibold text-pink-400 hover:text-pink-300">
-            Login
-          </Link>
-        </p>
+        <div style={{ textAlign: 'center', marginTop: '24px' }}>
+          <span style={{ color: '#62625b' }}>Already have an account? </span>
+          <Link to="/login" style={{ color: '#e60023', fontWeight: 600 }}>Log in</Link>
+        </div>
       </div>
     </div>
   );

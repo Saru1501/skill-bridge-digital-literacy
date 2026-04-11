@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import Navbar from "../components/Navbar";
+import useAuth from "../hooks/useAuth";
 
 export default function AdminDashboard() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,12 +16,11 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      const [coursesRes, usersRes] = await Promise.all([
+      const [coursesRes] = await Promise.all([
         api.get("/courses"),
-        api.get("/auth/users"),
       ]);
       setCourses(coursesRes.data.data || []);
-      setUsers(usersRes.data.data || []);
+      setUsers([]);
     } catch (err) {
       console.error("Error fetching data:", err);
     } finally {
@@ -27,102 +28,69 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#ffffff' }}>
-      <Navbar />
-
-      <div className="max-w-6xl mx-auto px-6 py-6">
-        <div className="flex gap-4 mb-8">
-          <Link
-            to="/admin/gamification"
-            className="px-6 py-3 rounded-lg transition hover:shadow-lg"
-            style={{ 
-              backgroundColor: '#ff385c', 
-              color: '#ffffff',
-              fontWeight: 500,
-              fontSize: '14px',
-              boxShadow: 'rgba(0,0,0,0.08) 0px 4px 12px'
-            }}
-          >
-            🎮 Gamification Management
-          </Link>
+    <div className="min-h-screen" style={{ backgroundColor: '#f6f6f3' }}>
+      <nav className="nav-glass">
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+            <Link to="/admin" style={{ fontSize: '20px', fontWeight: 700, color: '#ff385c' }}>SkillBridge</Link>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Link to="/admin" style={{ padding: '8px 16px', borderRadius: '20px', backgroundColor: '#e5e5e0', color: '#211922', fontWeight: 600, fontSize: '14px' }}>Dashboard</Link>
+              <Link to="/admin/gamification" style={{ padding: '8px 16px', borderRadius: '20px', color: '#211922', fontWeight: 500, fontSize: '14px' }}>Gamification</Link>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ color: '#62625b', fontSize: '14px' }}>{user?.name}</span>
+            <button onClick={handleLogout} className="btn-primary" style={{ padding: '8px 16px', fontSize: '13px' }}>Logout</button>
+          </div>
         </div>
+      </nav>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div 
-            className="p-6"
-            style={{ 
-              backgroundColor: '#ffffff', 
-              borderRadius: '20px',
-              boxShadow: 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.1) 0px 4px 8px'
-            }}
-          >
-            <div style={{ color: '#6a6a6a', fontSize: '14px' }}>Total Users</div>
-            <div className="text-3xl font-semibold" style={{ color: '#ff385c' }}>{users.length}</div>
+      <div className="container" style={{ padding: '32px 16px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 600, marginBottom: '24px' }}>Admin Dashboard</h1>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+          <div className="card" style={{ padding: '20px' }}>
+            <div style={{ fontSize: '13px', color: '#62625b' }}>Total Courses</div>
+            <div style={{ fontSize: '32px', fontWeight: 700, color: '#211922' }}>{courses.length}</div>
           </div>
-          <div 
-            className="p-6"
-            style={{ 
-              backgroundColor: '#ffffff', 
-              borderRadius: '20px',
-              boxShadow: 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.1) 0px 4px 8px'
-            }}
-          >
-            <div style={{ color: '#6a6a6a', fontSize: '14px' }}>Total Courses</div>
-            <div className="text-3xl font-semibold" style={{ color: '#222222' }}>{courses.length}</div>
-          </div>
-          <div 
-            className="p-6"
-            style={{ 
-              backgroundColor: '#ffffff', 
-              borderRadius: '20px',
-              boxShadow: 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.1) 0px 4px 8px'
-            }}
-          >
-            <Link to="/admin/gamification" style={{ color: '#6a6a6a', fontSize: '14px', textDecoration: 'none' }}>
-              Manage Gamification →
-            </Link>
+          <div className="card" style={{ padding: '20px' }}>
+            <Link to="/admin/gamification" style={{ fontSize: '13px', color: '#62625b', textDecoration: 'none' }}>Manage Gamification →</Link>
           </div>
         </div>
 
-        <h2 className="text-xl font-bold mb-4" style={{ color: '#222222', letterSpacing: '-0.18px' }}>Recent Courses</h2>
+        <h2 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '16px' }}>Recent Courses</h2>
+        
         {loading ? (
-          <p style={{ color: '#6a6a6a' }}>Loading...</p>
-        ) : (
-          <div 
-            style={{ 
-              backgroundColor: '#ffffff', 
-              borderRadius: '20px',
-              overflow: 'hidden',
-              boxShadow: 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.1) 0px 4px 8px'
-            }}
-          >
-            <table className="w-full">
-              <thead style={{ backgroundColor: '#f2f2f2' }}>
-                <tr>
-                  <th className="px-4 py-3 text-left" style={{ fontWeight: 600, color: '#222222', fontSize: '14px' }}>Title</th>
-                  <th className="px-4 py-3 text-left" style={{ fontWeight: 600, color: '#222222', fontSize: '14px' }}>Category</th>
-                  <th className="px-4 py-3 text-left" style={{ fontWeight: 600, color: '#222222', fontSize: '14px' }}>Price</th>
-                  <th className="px-4 py-3 text-left" style={{ fontWeight: 600, color: '#222222', fontSize: '14px' }}>Status</th>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#62625b' }}>Loading...</div>
+        ) : courses.length > 0 ? (
+          <div className="card" style={{ overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f6f6f3' }}>
+                  <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#211922' }}>Title</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#211922' }}>Category</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontWeight: 600, color: '#211922' }}>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {courses.slice(0, 5).map((course) => (
-                  <tr key={course._id} style={{ borderTop: '1px solid #f2f2f2' }}>
-                    <td className="px-4 py-3" style={{ color: '#222222', fontSize: '14px' }}>{course.title}</td>
-                    <td className="px-4 py-3" style={{ color: '#222222', fontSize: '14px' }}>{course.category}</td>
-                    <td className="px-4 py-3" style={{ color: '#222222', fontSize: '14px' }}>${course.price || 0}</td>
-                    <td className="px-4 py-3">
-                      <span 
-                        style={{ 
-                          padding: '4px 8px', 
-                          borderRadius: '14px',
-                          fontSize: '12px',
-                          fontWeight: 600,
-                          backgroundColor: course.isPublished ? '#f2f2f2' : '#f2f2f2',
-                          color: course.isPublished ? '#222222' : '#6a6a6a'
-                        }}
-                      >
+                  <tr key={course._id} style={{ borderTop: '1px solid #e5e5e0' }}>
+                    <td style={{ padding: '16px', color: '#211922' }}>{course.title}</td>
+                    <td style={{ padding: '16px', color: '#62625b' }}>{course.category}</td>
+                    <td style={{ padding: '16px' }}>
+                      <span style={{ 
+                        padding: '4px 12px', 
+                        borderRadius: '12px', 
+                        fontSize: '12px',
+                        backgroundColor: course.isPublished ? '#e6f4ea' : '#f6f6f3',
+                        color: course.isPublished ? '#137333' : '#62625b'
+                      }}>
                         {course.isPublished ? "Published" : "Draft"}
                       </span>
                     </td>
@@ -130,6 +98,10 @@ export default function AdminDashboard() {
                 ))}
               </tbody>
             </table>
+          </div>
+        ) : (
+          <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+            <p style={{ color: '#62625b' }}>No courses found.</p>
           </div>
         )}
       </div>

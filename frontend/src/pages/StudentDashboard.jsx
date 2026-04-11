@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import Navbar from "../components/Navbar";
+import useAuth from "../hooks/useAuth";
 
 export default function StudentDashboard() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,84 +24,86 @@ export default function StudentDashboard() {
     }
   };
 
-  const cardStyle = {
-    backgroundColor: '#ffffff',
-    borderRadius: '20px',
-    boxShadow: 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.1) 0px 4px 8px'
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: '#ffffff' }}>
-      <Navbar />
+  const navItems = [
+    { label: 'Home', icon: '🏠', path: '/student' },
+    { label: 'Activity', icon: '🏆', path: '/student/gamification' },
+    { label: 'Leaderboard', icon: '🥇', path: '/student/leaderboard' },
+  ];
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="p-6" style={cardStyle}>
-            <div style={{ color: '#6a6a6a', fontSize: '14px' }}>Enrolled Courses</div>
-            <div className="text-3xl font-semibold" style={{ color: '#ff385c' }}>{enrollments.length}</div>
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: '#f6f6f3' }}>
+      <nav className="nav-glass">
+        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+            <Link to="/student" style={{ fontSize: '20px', fontWeight: 700, color: '#ff385c' }}>SkillBridge</Link>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {navItems.map((item) => (
+                <Link 
+                  key={item.label}
+                  to={item.path} 
+                  style={{ padding: '8px 16px', borderRadius: '20px', color: '#211922', fontWeight: 500, fontSize: '14px' }}
+                >
+                  {item.icon} {item.label}
+                </Link>
+              ))}
+            </div>
           </div>
-          <Link to="/student/gamification" className="p-6 hover:shadow-lg transition" style={cardStyle}>
-            <div style={{ color: '#6a6a6a', fontSize: '14px' }}>My Points</div>
-            <div className="text-3xl font-semibold" style={{ color: '#222222' }}>View →</div>
-          </Link>
-          <Link to="/student/leaderboard" className="p-6 hover:shadow-lg transition" style={cardStyle}>
-            <div style={{ color: '#6a6a6a', fontSize: '14px' }}>My Rank</div>
-            <div className="text-3xl font-semibold" style={{ color: '#222222' }}>Check →</div>
-          </Link>
-          <div className="p-6" style={cardStyle}>
-            <div style={{ color: '#6a6a6a', fontSize: '14px' }}>Certificates</div>
-            <div className="text-3xl font-semibold" style={{ color: '#222222' }}>0</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ color: '#62625b', fontSize: '14px' }}>{user?.name}</span>
+            <button onClick={handleLogout} className="btn-primary" style={{ padding: '8px 16px', fontSize: '13px' }}>Logout</button>
           </div>
         </div>
+      </nav>
 
-        <h2 className="text-2xl font-bold mb-6" style={{ color: '#222222', letterSpacing: '-0.18px' }}>My Courses</h2>
+      <div className="container" style={{ padding: '32px 16px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 600, marginBottom: '24px' }}>Welcome back, {user?.name}!</h1>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+          <div className="card" style={{ padding: '20px' }}>
+            <div style={{ fontSize: '13px', color: '#62625b' }}>Enrolled Courses</div>
+            <div style={{ fontSize: '32px', fontWeight: 700, color: '#211922' }}>{enrollments.length}</div>
+          </div>
+          <Link to="/student/gamification" className="card" style={{ padding: '20px', textDecoration: 'none' }}>
+            <div style={{ fontSize: '13px', color: '#62625b' }}>My Points</div>
+            <div style={{ fontSize: '32px', fontWeight: 700, color: '#e60023' }}>View →</div>
+          </Link>
+          <Link to="/student/leaderboard" className="card" style={{ padding: '20px', textDecoration: 'none' }}>
+            <div style={{ fontSize: '13px', color: '#62625b' }}>My Rank</div>
+            <div style={{ fontSize: '32px', fontWeight: 700, color: '#211922' }}>Check →</div>
+          </Link>
+        </div>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '16px' }}>My Courses</h2>
+        
         {loading ? (
-          <p style={{ color: '#6a6a6a' }}>Loading...</p>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#62625b' }}>Loading...</div>
         ) : enrollments.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
             {enrollments.map((enrollment) => (
-              <div key={enrollment._id} className="p-6" style={cardStyle}>
-                <h3 className="font-semibold text-lg" style={{ color: '#222222' }}>{enrollment.course?.title || "Course"}</h3>
-                <div className="mt-3">
-                  <div style={{ color: '#6a6a6a', fontSize: '14px' }}>Status: {enrollment.completionStatus}</div>
-                  <div className="mt-3 h-2 rounded-full" style={{ backgroundColor: '#f2f2f2' }}>
-                    <div
-                      className="h-2 rounded-full"
-                      style={{ width: `${enrollment.course?.progress || 0}%`, backgroundColor: '#ff385c' }}
-                    />
-                  </div>
+              <div key={enrollment._id} className="card" style={{ padding: '20px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>{enrollment.course?.title || "Course"}</h3>
+                <div style={{ fontSize: '14px', color: '#62625b', marginBottom: '12px' }}>Status: {enrollment.completionStatus}</div>
+                <div style={{ height: '8px', backgroundColor: '#e5e5e0', borderRadius: '4px', marginBottom: '16px', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: '0%', backgroundColor: '#e60023', borderRadius: '4px' }} />
                 </div>
-                <Link
+                <Link 
                   to={`/student/course/${enrollment.course?._id}`}
-                  className="mt-4 block text-center py-2.5 rounded-lg transition hover:shadow-lg"
-                  style={{ 
-                    backgroundColor: '#222222', 
-                    color: '#ffffff',
-                    fontWeight: 500,
-                    fontSize: '14px'
-                  }}
+                  style={{ display: 'block', textAlign: 'center', padding: '10px', borderRadius: '20px', backgroundColor: '#e60023', color: 'white', fontWeight: 500 }}
                 >
-                  Continue Learning
+                  Continue
                 </Link>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12" style={cardStyle}>
-            <p style={{ color: '#6a6a6a', marginBottom: '16px' }}>You haven't enrolled in any courses yet.</p>
-            <Link 
-              to="/courses" 
-              className="px-6 py-2.5 rounded-lg transition hover:shadow-lg"
-              style={{ 
-                backgroundColor: '#ff385c', 
-                color: '#ffffff',
-                fontWeight: 500,
-                fontSize: '14px',
-                display: 'inline-block'
-              }}
-            >
-              Browse Courses
-            </Link>
+          <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+            <p style={{ color: '#62625b', marginBottom: '16px' }}>You haven't enrolled in any courses yet.</p>
+            <Link to="/courses" className="btn-primary" style={{ display: 'inline-block' }}>Browse Courses</Link>
           </div>
         )}
       </div>
