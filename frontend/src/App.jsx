@@ -12,6 +12,9 @@ import StudentTicketsPage from "./pages/StudentTicketsPage";
 import StudentPaymentPage from "./pages/StudentPaymentPage";
 import StudentLayout from "./layouts/StudentLayout";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import NgoLayout from "./layouts/NgoLayout";
+import NgoProgramsPage from "./pages/NgoProgramsPage";
+import NgoApplicationsPage from "./pages/NgoApplicationsPage";
 
 function App() {
   return (
@@ -38,13 +41,17 @@ function App() {
       </Route>
 
       <Route
-        path="/ngo"
-        element={
-          <ProtectedRoute allowedRoles={["ngo"]}>
-            <NgoDashboard />
-          </ProtectedRoute>
-        }
-      />
+  path="/ngo"
+  element={
+    <ProtectedRoute allowedRoles={["ngo"]}>
+      <NgoLayout />
+    </ProtectedRoute>
+  }
+>
+  <Route index element={<NgoDashboard />} />
+  <Route path="programs" element={<NgoProgramsPage />} />
+  <Route path="applications" element={<NgoApplicationsPage />} />
+</Route>
 
       <Route
         path="/admin"
