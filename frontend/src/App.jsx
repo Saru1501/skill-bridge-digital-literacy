@@ -15,6 +15,8 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import NgoLayout from "./layouts/NgoLayout";
 import NgoProgramsPage from "./pages/NgoProgramsPage";
 import NgoApplicationsPage from "./pages/NgoApplicationsPage";
+import AdminLayout from "./layouts/AdminLayout";
+import AdminTicketsPage from "./pages/AdminTicketsPage";
 
 function App() {
   return (
@@ -41,26 +43,29 @@ function App() {
       </Route>
 
       <Route
-  path="/ngo"
+        path="/ngo"
+        element={
+              <ProtectedRoute allowedRoles={["ngo"]}>
+                  <NgoLayout />
+              </ProtectedRoute>
+         }
+     >
+       <Route index element={<NgoDashboard />} />
+       <Route path="programs" element={<NgoProgramsPage />} />
+       <Route path="applications" element={<NgoApplicationsPage />} />
+    </Route>
+
+      <Route
+  path="/admin"
   element={
-    <ProtectedRoute allowedRoles={["ngo"]}>
-      <NgoLayout />
+    <ProtectedRoute allowedRoles={["admin"]}>
+      <AdminLayout />
     </ProtectedRoute>
   }
 >
-  <Route index element={<NgoDashboard />} />
-  <Route path="programs" element={<NgoProgramsPage />} />
-  <Route path="applications" element={<NgoApplicationsPage />} />
+  <Route index element={<AdminDashboard />} />
+  <Route path="tickets" element={<AdminTicketsPage />} />
 </Route>
-
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
 
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

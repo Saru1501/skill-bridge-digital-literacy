@@ -52,3 +52,13 @@ export const deleteProgram = async (programId) => {
   const response = await api.delete(`/sponsorship/programs/${programId}`);
   return response.data;
 };
+
+export const getAllTickets = async () => {
+  const response = await api.get("/tickets");
+  return response.data;
+};
+
+export const updateTicketStatus = async (ticketId, formData) => {
+  const response = await api.put(`/tickets/${ticketId}/status`, formData);
+  return response.data;
+};
