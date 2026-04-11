@@ -24,6 +24,12 @@ app.use("/api/enrollments", require("./src/routes/enrollmentRoutes"));
 app.use("/api/progress", require("./src/routes/progressRoutes"));
 app.use("/api/saved", require("./src/routes/savedCourseRoutes"));
 
+// Component 2: Assessment & Evaluation 
+app.use("/api/missions",    require("./src/routes/missionRoutes"));
+app.use("/api/submissions", require("./src/routes/missionSubmissionRoutes"));
+app.use("/api/quizzes",     require("./src/routes/quizRoutes"));
+app.use("/api/performance", require("./src/routes/performanceRoutes"));
+
 // Component 3: Gamification
 app.use("/api/badges", require("./src/routes/badgeRoutes"));
 app.use("/api/points", require("./src/routes/pointsRoutes"));

@@ -26,7 +26,7 @@ export default function RegisterPage() {
     if (role === "student") return "/student";
     if (role === "ngo") return "/ngo";
     if (role === "admin") return "/admin";
-    return "/";
+    return "/login";
   };
 
   const handleSubmit = async (e) => {
@@ -40,7 +40,8 @@ export default function RegisterPage() {
       return;
     }
 
-    navigate(getDashboardPath(formData.role));
+    const role = result.user?.role;
+    navigate(getDashboardPath(role), { replace: true });
   };
 
   return (

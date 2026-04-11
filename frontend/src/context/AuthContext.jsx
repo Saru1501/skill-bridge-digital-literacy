@@ -19,59 +19,59 @@ export function AuthProvider({ children }) {
     }
   }, [auth]);
 
- const login = async (formData) => {
-  setLoading(true);
-  try {
-    const res = await loginUser(formData);
+  const login = async (formData) => {
+    setLoading(true);
+    try {
+      const res = await loginUser(formData);
 
-    const newAuth = {
-      user: res.data,   // ✅ IMPORTANT (data, not user)
-      token: res.token,
-    };
+      const newAuth = {
+        user: res.data,
+        token: res.token,
+      };
 
-    setAuth(newAuth);
-    localStorage.setItem("skillbridge_auth", JSON.stringify(newAuth));
+      setAuth(newAuth);
+      localStorage.setItem("skillbridge_auth", JSON.stringify(newAuth));
 
-    return {
-      success: true,
-      user: res.data,   // ✅ return correct user
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || "Login failed",
-    };
-  } finally {
-    setLoading(false);
-  }
- };
+      return {
+        success: true,
+        user: res.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Login failed",
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const register = async (formData) => {
-  setLoading(true);
-  try {
-    const data = await registerUser(formData);
+    setLoading(true);
+    try {
+      const res = await registerUser(formData);
 
-    const newAuth = {
-      user: data.user,
-      token: data.token,
-    };
+      const newAuth = {
+        user: res.data,
+        token: res.token,
+      };
 
-    setAuth(newAuth);
-    localStorage.setItem("skillbridge_auth", JSON.stringify(newAuth));
+      setAuth(newAuth);
+      localStorage.setItem("skillbridge_auth", JSON.stringify(newAuth));
 
-    return {
-      success: true,
-      user: data.user,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || "Registration failed",
-    };
-  } finally {
-    setLoading(false);
-  }
- };
+      return {
+        success: true,
+        user: res.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Registration failed",
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const logout = () => {
     setAuth({ user: null, token: null });
@@ -80,11 +80,13 @@ export function AuthProvider({ children }) {
 
   const refreshUser = async () => {
     if (!auth?.token) return;
+
     try {
-      const data = await getMe();
+      const res = await getMe();
+
       setAuth((prev) => ({
         ...prev,
-        user: data.user,
+        user: res.data || res.user || prev.user,
       }));
     } catch (error) {
       logout();

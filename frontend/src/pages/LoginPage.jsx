@@ -21,30 +21,27 @@ export default function LoginPage() {
   };
 
   const getDashboardPath = (role) => {
-  if (role === "student") return "/student";
-  if (role === "ngo") return "/ngo";
-  if (role === "admin") return "/admin";
-  return "/";
+    if (role === "student") return "/student";
+    if (role === "ngo") return "/ngo";
+    if (role === "admin") return "/admin";
+    return "/login";
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
 
-  const result = await login(formData);
+    const result = await login(formData);
 
-  if (!result.success) {
-    setError(result.message);
-    return;
-  }
+    if (!result.success) {
+      setError(result.message);
+      return;
+    }
 
- /* const storedAuth = JSON.parse(localStorage.getItem("skillbridge_auth"));
-  const parsedAuth = storedAuth ? JSON.parse(storedAuth) : null;
-  const role = parsedAuth?.user?.role;*/
-    const role = result.user.role;
-    navigate(getDashboardPath(role));
-
+    const role = result.user?.role;
+    navigate(getDashboardPath(role), { replace: true });
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
