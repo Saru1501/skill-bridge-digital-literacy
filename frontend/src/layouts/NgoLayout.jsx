@@ -6,9 +6,9 @@ export default function NgoLayout() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  logout();
+  navigate("/login", { replace: true });
+};
 
   const linkClass = ({ isActive }) =>
     `block rounded-lg px-4 py-3 font-medium transition ${
@@ -49,8 +49,19 @@ export default function NgoLayout() {
         </aside>
 
         <main className="p-6 md:p-8">
-          <Outlet />
-        </main>
+  <div className="mb-6 flex items-center justify-between rounded-2xl bg-white px-5 py-4 shadow-sm">
+    <div>
+      <p className="text-sm text-gray-500">Role</p>
+      <p className="font-semibold text-gray-900 capitalize">{user?.role}</p>
+    </div>
+    <div className="text-right">
+      <p className="text-sm text-gray-500">Session</p>
+      <p className="font-semibold text-green-600">Active</p>
+    </div>
+  </div>
+
+  <Outlet />
+</main>
       </div>
     </div>
   );

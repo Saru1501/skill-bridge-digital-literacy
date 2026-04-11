@@ -62,3 +62,35 @@ export const updateTicketStatus = async (ticketId, formData) => {
   const response = await api.put(`/tickets/${ticketId}/status`, formData);
   return response.data;
 };
+
+export const getStudentDashboardData = async () => {
+  const [programsRes, ticketsRes] = await Promise.all([
+    api.get("/sponsorship/programs"),
+    api.get("/tickets/my"),
+  ]);
+
+  return {
+    programs: programsRes.data.programs || [],
+    tickets: ticketsRes.data.tickets || [],
+  };
+};
+
+export const getNgoDashboardData = async () => {
+  const [programsRes, applicationsRes] = await Promise.all([
+    api.get("/sponsorship/programs"),
+    api.get("/sponsorship/applications"),
+  ]);
+
+  return {
+    programs: programsRes.data.programs || [],
+    applications: applicationsRes.data.applications || [],
+  };
+};
+
+export const getAdminDashboardData = async () => {
+  const ticketsRes = await api.get("/tickets");
+
+  return {
+    tickets: ticketsRes.data.tickets || [],
+  };
+};
