@@ -1,48 +1,105 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/ui/ProtectedRoute";
-import AppLayout from "./components/layout/AppLayout";
-import Login from "./pages/Login";
-import Dashboard from "./pages/student/Dashboard";
-import BrowseCourses from "./pages/student/BrowseCourses";
-import CourseDetail from "./pages/student/CourseDetail";
-import MyCourses from "./pages/student/MyCourses";
-import LessonView from "./pages/student/LessonView";
-import SavedResources from "./pages/student/SavedResources";
-import Downloads from "./pages/student/Downloads";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import ManageCourses from "./pages/admin/ManageCourses";
-import ManageLessons from "./pages/admin/ManageLessons";
-import ManageResources from "./pages/admin/ManageResources";
+import { Routes, Route, Navigate } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
+import StudentDashboard from "./pages/StudentDashboard";
+import NgoDashboard from "./pages/NgoDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import StudentProgramsPage from "./pages/StudentProgramsPage";
+import StudentApplyPage from "./pages/StudentApplyPage";
+import StudentRedeemPage from "./pages/StudentRedeemPage";
+import StudentTicketsPage from "./pages/StudentTicketsPage";
+import StudentPaymentPage from "./pages/StudentPaymentPage";
+import StudentLayout from "./layouts/StudentLayout";
+import GamificationDashboard from "./pages/gamification/GamificationDashboard";
+import AdminGamification from "./pages/gamification/AdminGamification";
+import Leaderboard from "./pages/gamification/Leaderboard";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import NgoLayout from "./layouts/NgoLayout";
+import NgoProgramsPage from "./pages/NgoProgramsPage";
+import NgoApplicationsPage from "./pages/NgoApplicationsPage";
+import AdminLayout from "./layouts/AdminLayout";
+import AdminTicketsPage from "./pages/AdminTicketsPage";
 
-export default function App() {
+function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-            <Route path="/dashboard"   element={<Dashboard />} />
-            <Route path="/browse"      element={<BrowseCourses />} />
-            <Route path="/course/:id"  element={<CourseDetail />} />
-            <Route path="/my-courses"  element={<MyCourses />} />
-            <Route path="/lesson/:id"  element={<LessonView />} />
-            <Route path="/saved"       element={<SavedResources />} />
-            <Route path="/downloads"   element={<Downloads />} />
-          </Route>
+      <Route
+        path="/student"
+        element={
+          <ProtectedRoute allowedRoles={["student"]}>
+            <StudentLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<StudentDashboard />} />
+        <Route path="programs" element={<StudentProgramsPage />} />
+        <Route path="apply" element={<StudentApplyPage />} />
+        <Route path="redeem" element={<StudentRedeemPage />} />
+        <Route path="tickets" element={<StudentTicketsPage />} />
+        <Route path="payment" element={<StudentPaymentPage />} />
+      </Route>
 
-          <Route element={<ProtectedRoute adminOnly><AppLayout /></ProtectedRoute>}>
-            <Route path="/admin"                                element={<AdminDashboard />} />
-            <Route path="/admin/courses"                        element={<ManageCourses />} />
-            <Route path="/admin/courses/:courseId/lessons"      element={<ManageLessons />} />
-            <Route path="/admin/lessons/:lessonId/resources"    element={<ManageResources />} />
-          </Route>
+      <Route
+        path="/student/gamification"
+        element={
+          <ProtectedRoute allowedRoles={["student"]}>
+            <GamificationDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+      <Route
+        path="/student/leaderboard"
+        element={
+          <ProtectedRoute allowedRoles={["student"]}>
+            <Leaderboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/ngo"
+        element={
+          <ProtectedRoute allowedRoles={["ngo"]}>
+            <NgoLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<NgoDashboard />} />
+        <Route path="programs" element={<NgoProgramsPage />} />
+        <Route path="applications" element={<NgoApplicationsPage />} />
+      </Route>
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<AdminDashboard />} />
+        <Route path="tickets" element={<AdminTicketsPage />} />
+      </Route>
+
+      <Route
+        path="/admin/gamification"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminGamification />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
+
+export default App;

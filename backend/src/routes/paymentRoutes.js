@@ -4,6 +4,6 @@ const { createPaymentIntent } = require("../controllers/paymentController");
 
 const router = express.Router();
 
-router.post("/intent", protect, authorize("Student"), createPaymentIntent);
+router.post("/intent", protect, authorize("student"), createPaymentIntent);
 
 module.exports = router;

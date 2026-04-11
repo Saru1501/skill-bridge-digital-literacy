@@ -9,10 +9,10 @@ const {
 
 const router = express.Router();
 
-router.post("/", protect, authorize("Student"), createTicket);
-router.get("/my", protect, authorize("Student"), getMyTickets);
+router.post("/", protect, authorize("student"), createTicket);
+router.get("/my", protect, authorize("student"), getMyTickets);
 
-router.get("/", protect, authorize("Admin"), getAllTickets);
-router.put("/:id/status", protect, authorize("Admin"), updateTicketStatus);
+router.get("/", protect, authorize("admin"), getAllTickets);
+router.put("/:id/status", protect, authorize("admin"), updateTicketStatus);
 
 module.exports = router;
