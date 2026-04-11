@@ -19,46 +19,63 @@ export function AuthProvider({ children }) {
     }
   }, [auth]);
 
-  const login = async (formData) => {
-    setLoading(true);
-    try {
-      const data = await loginUser(formData);
-      setAuth({
-        user: data.user,
-        token: data.token,
-      });
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || "Login failed",
-      };
-    } finally {
-      setLoading(false);
-    }
-  };
+ const login = async (formData) => {
+  setLoading(true);
+  try {
+    const res = await loginUser(formData);
+
+    const newAuth = {
+      user: res.data,   // ✅ IMPORTANT (data, not user)
+      token: res.token,
+    };
+
+    setAuth(newAuth);
+    localStorage.setItem("skillbridge_auth", JSON.stringify(newAuth));
+
+    return {
+      success: true,
+      user: res.data,   // ✅ return correct user
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "Login failed",
+    };
+  } finally {
+    setLoading(false);
+  }
+ };
 
   const register = async (formData) => {
-    setLoading(true);
-    try {
-      const data = await registerUser(formData);
-      setAuth({
-        user: data.user,
-        token: data.token,
-      });
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || "Registration failed",
-      };
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const data = await registerUser(formData);
+
+    const newAuth = {
+      user: data.user,
+      token: data.token,
+    };
+
+    setAuth(newAuth);
+    localStorage.setItem("skillbridge_auth", JSON.stringify(newAuth));
+
+    return {
+      success: true,
+      user: data.user,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || "Registration failed",
+    };
+  } finally {
+    setLoading(false);
+  }
+ };
 
   const logout = () => {
     setAuth({ user: null, token: null });
+    localStorage.removeItem("skillbridge_auth");
   };
 
   const refreshUser = async () => {

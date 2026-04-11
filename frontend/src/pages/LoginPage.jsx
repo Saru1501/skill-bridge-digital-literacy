@@ -4,7 +4,7 @@ import useAuth from "../hooks/useAuth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, loading, user } = useAuth();
+  const { login, loading } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -21,27 +21,30 @@ export default function LoginPage() {
   };
 
   const getDashboardPath = (role) => {
-    if (role === "Student") return "/student";
-    if (role === "NGO") return "/ngo";
-    if (role === "Admin") return "/admin";
-    return "/";
+  if (role === "student") return "/student";
+  if (role === "ngo") return "/ngo";
+  if (role === "admin") return "/admin";
+  return "/";
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    const result = await login(formData);
+  const result = await login(formData);
 
-    if (!result.success) {
-      setError(result.message);
-      return;
-    }
+  if (!result.success) {
+    setError(result.message);
+    return;
+  }
 
-    navigate(getDashboardPath(user?.role || "Student"));
-    window.location.reload();
+ /* const storedAuth = JSON.parse(localStorage.getItem("skillbridge_auth"));
+  const parsedAuth = storedAuth ? JSON.parse(storedAuth) : null;
+  const role = parsedAuth?.user?.role;*/
+    const role = result.user.role;
+    navigate(getDashboardPath(role));
+
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">

@@ -10,7 +10,7 @@ export default function RegisterPage() {
     name: "",
     email: "",
     password: "",
-    role: "Student",
+    role: "student",
   });
 
   const [error, setError] = useState("");
@@ -23,9 +23,9 @@ export default function RegisterPage() {
   };
 
   const getDashboardPath = (role) => {
-    if (role === "Student") return "/student";
-    if (role === "NGO") return "/ngo";
-    if (role === "Admin") return "/admin";
+    if (role === "student") return "/student";
+    if (role === "ngo") return "/ngo";
+    if (role === "admin") return "/admin";
     return "/";
   };
 
@@ -91,9 +91,9 @@ export default function RegisterPage() {
             onChange={handleChange}
             className="w-full border rounded-lg px-4 py-3"
           >
-            <option value="Student">Student</option>
-            <option value="NGO">NGO</option>
-            <option value="Admin">Admin</option>
+            <option value="student">Student</option>
+            <option value="ngo">NGO</option>
+            <option value="admin">Admin</option>
           </select>
 
           <button
