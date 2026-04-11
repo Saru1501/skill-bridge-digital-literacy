@@ -4,7 +4,7 @@ import useAuth from "../hooks/useAuth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, loading, user } = useAuth();
+  const { login, loading } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -21,9 +21,10 @@ export default function LoginPage() {
   };
 
   const getDashboardPath = (role) => {
-    if (role === "Student") return "/student";
-    if (role === "NGO") return "/ngo";
-    if (role === "Admin") return "/admin";
+    const r = role?.toLowerCase();
+    if (r === "admin") return "/admin";
+    if (r === "ngo") return "/ngo";
+    if (r === "student") return "/student";
     return "/";
   };
 
@@ -38,17 +39,47 @@ export default function LoginPage() {
       return;
     }
 
-    navigate(getDashboardPath(user?.role || "Student"));
-    window.location.reload();
+    setTimeout(() => {
+      const stored = JSON.parse(localStorage.getItem("skillbridge_auth") || "{}");
+      const role = stored?.user?.role || "student";
+      navigate(getDashboardPath(role));
+    }, 50);
+  };
+
+  const inputStyle = {
+    width: '100%',
+    padding: '12px 16px',
+    borderRadius: '8px',
+    border: '1px solid #f2f2f2',
+    fontSize: '14px',
+    outline: 'none',
+    backgroundColor: '#ffffff',
+    color: '#222222',
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#ffffff' }}>
+      <div 
+        className="w-full max-w-md p-8"
+        style={{ 
+          backgroundColor: '#ffffff', 
+          borderRadius: '32px',
+          boxShadow: 'rgba(0,0,0,0.02) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 2px 6px, rgba(0,0,0,0.1) 0px 4px 8px'
+        }}
+      >
+        <h1 className="text-2xl font-bold mb-6 text-center" style={{ color: '#222222', letterSpacing: '-0.18px' }}>
+          Welcome back
+        </h1>
 
         {error && (
-          <p className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+          <p 
+            className="mb-4 text-sm p-3 rounded-lg"
+            style={{ 
+              color: '#c13515', 
+              backgroundColor: 'rgba(193, 53, 21, 0.1)',
+              borderRadius: '14px'
+            }}
+          >
             {error}
           </p>
         )}
@@ -60,7 +91,7 @@ export default function LoginPage() {
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
+            style={inputStyle}
             required
           />
 
@@ -70,23 +101,32 @@ export default function LoginPage() {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
+            style={inputStyle}
             required
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white rounded-lg py-3 font-semibold"
+            className="w-full py-3 rounded-lg font-medium transition"
+            style={{ 
+              backgroundColor: '#ff385c', 
+              color: '#ffffff',
+              fontSize: '16px',
+              fontWeight: 500,
+              border: 'none',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1
+            }}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Logging in..." : "Log in"}
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-center">
-          Don&apos;t have an account?{" "}
-          <Link to="/register" className="font-semibold underline">
-            Register
+        <p className="mt-6 text-sm text-center" style={{ color: '#6a6a6a' }}>
+          Don't have an account?{" "}
+          <Link to="/register" style={{ color: '#222222', fontWeight: 600, textDecoration: 'none' }}>
+            Sign up
           </Link>
         </p>
       </div>

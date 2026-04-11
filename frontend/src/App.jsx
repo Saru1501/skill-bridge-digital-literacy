@@ -6,6 +6,9 @@ import UnauthorizedPage from "./pages/UnauthorizedPage";
 import StudentDashboard from "./pages/StudentDashboard";
 import NgoDashboard from "./pages/NgoDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import GamificationDashboard from "./pages/gamification/GamificationDashboard";
+import AdminGamification from "./pages/gamification/AdminGamification";
+import Leaderboard from "./pages/gamification/Leaderboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
@@ -26,6 +29,24 @@ function App() {
       />
 
       <Route
+        path="/student/gamification"
+        element={
+          <ProtectedRoute allowedRoles={["Student"]}>
+            <GamificationDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/student/leaderboard"
+        element={
+          <ProtectedRoute allowedRoles={["Student"]}>
+            <Leaderboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/ngo"
         element={
           <ProtectedRoute allowedRoles={["NGO"]}>
@@ -39,6 +60,15 @@ function App() {
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/gamification"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminGamification />
           </ProtectedRoute>
         }
       />

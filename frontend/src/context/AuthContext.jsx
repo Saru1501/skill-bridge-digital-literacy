@@ -67,12 +67,18 @@ export function AuthProvider({ children }) {
       const data = await getMe();
       setAuth((prev) => ({
         ...prev,
-        user: data.user,
+        user: data,
       }));
     } catch (error) {
       logout();
     }
   };
+
+  useEffect(() => {
+    if (auth?.token) {
+      refreshUser();
+    }
+  }, []);
 
   const value = useMemo(
     () => ({

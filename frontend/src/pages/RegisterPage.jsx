@@ -10,7 +10,7 @@ export default function RegisterPage() {
     name: "",
     email: "",
     password: "",
-    role: "Student",
+    role: "student",
   });
 
   const [error, setError] = useState("");
@@ -23,9 +23,10 @@ export default function RegisterPage() {
   };
 
   const getDashboardPath = (role) => {
-    if (role === "Student") return "/student";
-    if (role === "NGO") return "/ngo";
-    if (role === "Admin") return "/admin";
+    const r = role?.toLowerCase();
+    if (r === "admin") return "/admin";
+    if (r === "ngo") return "/ngo";
+    if (r === "student") return "/student";
     return "/";
   };
 
@@ -40,16 +41,19 @@ export default function RegisterPage() {
       return;
     }
 
-    navigate(getDashboardPath(formData.role));
+    // Read from localStorage after state update
+    setTimeout(() => {
+      navigate(getDashboardPath(formData.role));
+    }, 50);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold mb-6 text-center">Register</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 px-4">
+      <div className="w-full max-w-md bg-white/10 backdrop-blur rounded-2xl shadow-xl p-8">
+        <h1 className="text-3xl font-bold mb-6 text-center text-white">Create Account</h1>
 
         {error && (
-          <p className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+          <p className="mb-4 text-sm text-red-300 bg-red-500/20 p-3 rounded-lg">
             {error}
           </p>
         )}
@@ -61,7 +65,7 @@ export default function RegisterPage() {
             placeholder="Full name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
+            className="w-full border border-white/20 bg-white/10 rounded-lg px-4 py-3 text-white placeholder-white/50"
             required
           />
 
@@ -71,7 +75,7 @@ export default function RegisterPage() {
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
+            className="w-full border border-white/20 bg-white/10 rounded-lg px-4 py-3 text-white placeholder-white/50"
             required
           />
 
@@ -81,7 +85,7 @@ export default function RegisterPage() {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
+            className="w-full border border-white/20 bg-white/10 rounded-lg px-4 py-3 text-white placeholder-white/50"
             required
           />
 
@@ -89,25 +93,25 @@ export default function RegisterPage() {
             name="role"
             value={formData.role}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
+            className="w-full border border-white/20 bg-white/10 rounded-lg px-4 py-3 text-white"
           >
-            <option value="Student">Student</option>
-            <option value="NGO">NGO</option>
-            <option value="Admin">Admin</option>
+            <option value="student" className="text-black">Student</option>
+            <option value="ngo" className="text-black">NGO</option>
+            <option value="admin" className="text-black">Admin</option>
           </select>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white rounded-lg py-3 font-semibold"
+            className="w-full bg-pink-500 text-white rounded-lg py-3 font-semibold hover:bg-pink-600 transition disabled:opacity-50"
           >
-            {loading ? "Registering..." : "Register"}
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-center">
+        <p className="mt-6 text-sm text-center text-white/70">
           Already have an account?{" "}
-          <Link to="/login" className="font-semibold underline">
+          <Link to="/login" className="font-semibold text-pink-400 hover:text-pink-300">
             Login
           </Link>
         </p>
