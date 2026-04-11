@@ -12,3 +12,11 @@ cd Backend
 npm install
 npm run dev
 ```
+
+## Backend Environment
+
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/SkillBridge
+JWT_SECRET=skillbridge_secret_key
+```

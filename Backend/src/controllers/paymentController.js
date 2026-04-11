@@ -1,11 +1,25 @@
 const Stripe = require("stripe");
 const Payment = require("../models/Payment");
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const getStripeClient = () => {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return null;
+  }
+
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+};
 
 // Student: create payment intent
 const createPaymentIntent = async (req, res) => {
   try {
+    const stripe = getStripeClient();
+
+    if (!stripe) {
+      return res.status(503).json({
+        message: "Payments are not configured. Set STRIPE_SECRET_KEY to enable Stripe.",
+      });
+    }
+
     const { amountLKR, purpose } = req.body;
 
     if (amountLKR === undefined || amountLKR === null) {

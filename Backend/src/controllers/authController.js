@@ -3,6 +3,13 @@ const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
 
 const ALLOWED_ROLES = ["Student", "University", "NGO", "Mentor", "Admin"];
+const ROLE_MAP = {
+  student: "Student",
+  university: "University",
+  ngo: "NGO",
+  mentor: "Mentor",
+  admin: "Admin",
+};
 
 const sanitizeUser = (user) => ({
   _id: user._id,
@@ -14,12 +21,13 @@ const sanitizeUser = (user) => ({
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    const normalizedRole = role ? ROLE_MAP[String(role).toLowerCase()] : "Student";
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Name, email, and password are required" });
     }
 
-    if (role && !ALLOWED_ROLES.includes(role)) {
+    if (role && !normalizedRole) {
       return res.status(400).json({
         message: `Invalid role. Allowed roles: ${ALLOWED_ROLES.join(", ")}`,
       });
@@ -36,13 +44,13 @@ const registerUser = async (req, res) => {
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
-      role: role || "Student",
+      role: normalizedRole,
     });
 
     return res.status(201).json({
       message: "User registered successfully",
       token: generateToken(user._id),
-      user: sanitizeUser(user),
+      data: sanitizeUser(user),
     });
   } catch (error) {
     return res.status(500).json({ message: error.message || "Server error" });
@@ -72,7 +80,7 @@ const loginUser = async (req, res) => {
     return res.status(200).json({
       message: "Login successful",
       token: generateToken(user._id),
-      user: sanitizeUser(user),
+      data: sanitizeUser(user),
     });
   } catch (error) {
     return res.status(500).json({ message: error.message || "Server error" });
@@ -81,7 +89,7 @@ const loginUser = async (req, res) => {
 
 const getMe = async (req, res) => {
   try {
-    return res.status(200).json({ user: req.user });
+    return res.status(200).json({ data: req.user });
   } catch (error) {
     return res.status(500).json({ message: error.message || "Server error" });
   }
