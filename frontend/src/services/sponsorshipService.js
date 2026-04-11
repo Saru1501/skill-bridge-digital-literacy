@@ -24,3 +24,8 @@ export const getMyTickets = async () => {
   const response = await api.get("/tickets/my");
   return response.data;
 };
+
+export const createPaymentIntent = async (formData) => {
+  const response = await api.post("/payments/intent", formData);
+  return response.data;
+};
