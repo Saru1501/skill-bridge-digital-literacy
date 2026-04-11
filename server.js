@@ -1,60 +1,68 @@
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const dotenv = require("dotenv");
 const connectDB = require("./src/config/db");
 
-// Route imports
-const authRoutes = require("./src/routes/authRoutes");
-const courseRoutes = require("./src/routes/courseRoutes");
-const lessonRoutes = require("./src/routes/lessonRoutes");
-const enrollmentRoutes = require("./src/routes/enrollmentRoutes");
-const progressRoutes = require("./src/routes/progressRoutes");
-const savedCourseRoutes = require("./src/routes/savedCourseRoutes");
+dotenv.config();
 
 const app = express();
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Base route
-app.get("/", (req, res) => {
-  res.send("Skill Bridge API Running...");
-});
+// Health check
+app.get("/", (req, res) => res.status(200).json({ success: true, message: "SkillBridge API running" }));
 
-// Mount routes
-app.use("/api/auth", authRoutes);
-app.use("/api/courses", courseRoutes);
-app.use("/api/lessons", lessonRoutes);
-app.use("/api/enrollments", enrollmentRoutes);
-app.use("/api/progress", progressRoutes);
-app.use("/api/saved", savedCourseRoutes);
+// ── Auth ──────────────────────────────────────────────────────────────────────
+app.use("/api/auth", require("./src/routes/authRoutes"));
 
-// Handle unknown routes
+// ── Component 1: Learning Management & Offline Delivery ──────────────────────
+app.use("/api/courses",     require("./src/routes/courseRoutes"));
+app.use("/api/lessons",     require("./src/routes/lessonRoutes"));
+app.use("/api/enrollments", require("./src/routes/enrollmentRoutes"));
+app.use("/api/progress",    require("./src/routes/progressRoutes"));
+app.use("/api/saved",       require("./src/routes/savedCourseRoutes"));
+
+// ── Component 2: Assessment & Evaluation ─────────────────────────────────────
+app.use("/api/missions",    require("./src/routes/missionRoutes"));
+app.use("/api/submissions", require("./src/routes/missionSubmissionRoutes"));
+app.use("/api/quizzes",     require("./src/routes/quizRoutes"));
+app.use("/api/performance", require("./src/routes/performanceRoutes"));
+
+// ── Component 3: Gamification, Rewards & Certification ───────────────────────
+app.use("/api/badges",        require("./src/routes/badgeRoutes"));
+app.use("/api/points",        require("./src/routes/pointsRoutes"));
+app.use("/api/certificates",  require("./src/routes/certificateRoutes"));
+app.use("/api/leaderboard",   require("./src/routes/leaderboardRoutes"));
+app.use("/api/fee-reduction", require("./src/routes/feeReductionRoutes"));
+app.use("/api/gamification",  require("./src/routes/gamificationRoutes"));
+
+// ── Component 4: Sponsorship, Payments & Support ─────────────────────────────
+app.use("/api/sponsorship", require("./src/routes/sponsorshipRoutes"));
+app.use("/api/tickets",     require("./src/routes/ticketRoutes"));
+app.use("/api/payments",    require("./src/routes/paymentRoutes"));
+
+// 404 handler
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: "Route not found" });
+  res.status(404).json({ success: false, message: `Route ${req.method} ${req.originalUrl} not found` });
 });
 
-const PORT = process.env.PORT || 5000;
+// DB connection
+const dbReady = connectDB();
 
-const startServer = async () => {
-  await connectDB();
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+const PORT = process.env.PORT || 3001;
+
+if (require.main === module) {
+  dbReady.then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  }).catch((err) => {
+    console.error("Failed to connect to DB:", err.message);
+    process.exit(1);
   });
-};
+}
 
-startServer();
-
-const badgeRoutes = require("./src/routes/badgeRoutes");
-const pointsRoutes = require("./src/routes/pointsRoutes");
-const certificateRoutes = require("./src/routes/certificateRoutes");
-const leaderboardRoutes = require("./src/routes/leaderboardRoutes");
-const feeReductionRoutes = require("./src/routes/feeReductionRoutes");
-const gamificationRoutes = require("./src/routes/gamificationRoutes");
- 
-app.use("/api/badges", badgeRoutes);
-app.use("/api/points", pointsRoutes);
-app.use("/api/certificates", certificateRoutes);
-app.use("/api/leaderboard", leaderboardRoutes);
-app.use("/api/fee-reduction", feeReductionRoutes);
-app.use("/api/gamification", gamificationRoutes);
+module.exports = app;
+module.exports.dbReady = dbReady;
