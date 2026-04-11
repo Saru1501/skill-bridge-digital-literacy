@@ -69,17 +69,26 @@ export default function AdminDashboard() {
       </div>
 
       <div className="rounded-2xl bg-white p-6 shadow-sm text-left">
-        <h3 className="text-xl font-semibold text-gray-900">Quick Action</h3>
+        <h3 className="text-xl font-semibold text-gray-900">Quick Actions</h3>
         <p className="mt-3 text-gray-600">
           Open the support ticket panel to update statuses and resolve student issues.
         </p>
 
-        <Link
-          to="/admin/tickets"
-          className="inline-block mt-5 rounded-lg bg-black px-5 py-3 text-white font-semibold hover:bg-gray-800"
-        >
-          Manage Support Tickets
-        </Link>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <Link
+            to="/admin/tickets"
+            className="rounded-lg bg-black px-5 py-3 text-white font-semibold hover:bg-gray-800"
+          >
+            Manage Support Tickets
+          </Link>
+
+          <Link
+            to="/admin/gamification"
+            className="rounded-lg border px-5 py-3 font-semibold text-gray-700 hover:bg-gray-50"
+          >
+            Manage Gamification
+          </Link>
+        </div>
       </div>
     </div>
   );

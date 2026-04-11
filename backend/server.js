@@ -11,6 +11,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+
 // Health check
 app.get("/", (req, res) => res.status(200).json({ success: true, message: "SkillBridge API running" }));
 
@@ -24,11 +26,11 @@ app.use("/api/enrollments", require("./src/routes/enrollmentRoutes"));
 app.use("/api/progress", require("./src/routes/progressRoutes"));
 app.use("/api/saved", require("./src/routes/savedCourseRoutes"));
 
-// Component 2: Assessment & Evaluation 
-app.use("/api/missions",    require("./src/routes/missionRoutes"));
-app.use("/api/submissions", require("./src/routes/missionSubmissionRoutes"));
-app.use("/api/quizzes",     require("./src/routes/quizRoutes"));
-app.use("/api/performance", require("./src/routes/performanceRoutes"));
+// Component 2: Assessments & Practice Missions
+app.use("/api/missions", require("./src/routes/missionRoutes"));
+app.use("/api/mission-submissions", require("./src/routes/missionSubmissionRoutes"));
+app.use("/api/quizzes", require("./src/routes/quizRoutes"));
+app.use("/api/quiz-attempts", require("./src/routes/performanceRoutes"));
 
 // Component 3: Gamification
 app.use("/api/badges", require("./src/routes/badgeRoutes"));
@@ -51,7 +53,7 @@ app.use((req, res) => {
 // DB connection - returns promise so tests can await it
 const dbReady = connectDB();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 if (require.main === module) {
   dbReady.then(() => {

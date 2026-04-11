@@ -21,9 +21,10 @@ export default function LoginPage() {
   };
 
   const getDashboardPath = (role) => {
-    if (role === "student") return "/student";
-    if (role === "ngo") return "/ngo";
-    if (role === "admin") return "/admin";
+    const r = role?.toLowerCase();
+    if (r === "admin") return "/admin";
+    if (r === "ngo") return "/ngo";
+    if (r === "student") return "/student";
     return "/login";
   };
 
@@ -43,24 +44,71 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+    <div
+      className="min-h-screen"
+      style={{
+        backgroundColor: "#f6f6f3",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "white",
+          borderRadius: "24px",
+          padding: "40px",
+          maxWidth: "400px",
+          width: "100%",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <div
+            style={{
+              fontSize: "48px",
+              fontWeight: 700,
+              color: "#ff385c",
+              marginBottom: "16px",
+            }}
+          >
+            SkillBridge
+          </div>
+          <h1 style={{ fontSize: "28px", fontWeight: 600, color: "#211922" }}>
+            Welcome back
+          </h1>
+          <p style={{ color: "#62625b", marginTop: "8px" }}>
+            Log in to continue your learning journey
+          </p>
+        </div>
 
         {error && (
-          <p className="mb-4 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+          <div
+            style={{
+              backgroundColor: "#fff0f0",
+              color: "#9e0a0a",
+              padding: "12px",
+              borderRadius: "12px",
+              marginBottom: "16px",
+              fontSize: "14px",
+            }}
+          >
             {error}
-          </p>
+          </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+        >
           <input
             type="email"
             name="email"
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
+            style={{ width: "100%" }}
             required
           />
 
@@ -70,25 +118,26 @@ export default function LoginPage() {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-3"
+            style={{ width: "100%" }}
             required
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white rounded-lg py-3 font-semibold"
+            className="btn-primary"
+            style={{ width: "100%", padding: "14px", fontSize: "16px" }}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Logging in..." : "Log in"}
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-center">
-          Don&apos;t have an account?{" "}
-          <Link to="/register" className="font-semibold underline">
-            Register
+        <div style={{ textAlign: "center", marginTop: "24px" }}>
+          <span style={{ color: "#62625b" }}>Don't have an account? </span>
+          <Link to="/register" style={{ color: "#e60023", fontWeight: 600 }}>
+            Sign up
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

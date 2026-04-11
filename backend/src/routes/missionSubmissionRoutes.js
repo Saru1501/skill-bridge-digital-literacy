@@ -1,7 +1,7 @@
 // routes/missionSubmissionRoutes.js
 const router = require('express').Router();
 const msc = require('../controllers/missionSubmissionController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/authMiddleware');
 
 router.patch('/:id/grade', protect, authorize('admin', 'university'), msc.gradeSubmission);
 

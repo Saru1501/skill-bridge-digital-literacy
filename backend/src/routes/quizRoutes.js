@@ -2,7 +2,7 @@
 const router = require('express').Router();
 const qc = require('../controllers/quizController');
 const qac = require('../controllers/quizAttemptController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/authMiddleware');
 
 router.get('/', protect, qc.getQuizzesByCourse);
 router.get('/:id', protect, qc.getQuizById);

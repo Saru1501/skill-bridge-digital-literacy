@@ -11,6 +11,9 @@ import StudentRedeemPage from "./pages/StudentRedeemPage";
 import StudentTicketsPage from "./pages/StudentTicketsPage";
 import StudentPaymentPage from "./pages/StudentPaymentPage";
 import StudentLayout from "./layouts/StudentLayout";
+import GamificationDashboard from "./pages/gamification/GamificationDashboard";
+import AdminGamification from "./pages/gamification/AdminGamification";
+import Leaderboard from "./pages/gamification/Leaderboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import NgoLayout from "./layouts/NgoLayout";
 import NgoProgramsPage from "./pages/NgoProgramsPage";
@@ -24,7 +27,7 @@ function App() {
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/unauthorized" element={<UnauthorizedPage />} /> 
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
       <Route
         path="/student"
@@ -43,29 +46,56 @@ function App() {
       </Route>
 
       <Route
-        path="/ngo"
+        path="/student/gamification"
         element={
-              <ProtectedRoute allowedRoles={["ngo"]}>
-                  <NgoLayout />
-              </ProtectedRoute>
-         }
-     >
-       <Route index element={<NgoDashboard />} />
-       <Route path="programs" element={<NgoProgramsPage />} />
-       <Route path="applications" element={<NgoApplicationsPage />} />
-    </Route>
+          <ProtectedRoute allowedRoles={["student"]}>
+            <GamificationDashboard />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
-  path="/admin"
-  element={
-    <ProtectedRoute allowedRoles={["admin"]}>
-      <AdminLayout />
-    </ProtectedRoute>
-  }
->
-  <Route index element={<AdminDashboard />} />
-  <Route path="tickets" element={<AdminTicketsPage />} />
-</Route>
+        path="/student/leaderboard"
+        element={
+          <ProtectedRoute allowedRoles={["student"]}>
+            <Leaderboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/ngo"
+        element={
+          <ProtectedRoute allowedRoles={["ngo"]}>
+            <NgoLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<NgoDashboard />} />
+        <Route path="programs" element={<NgoProgramsPage />} />
+        <Route path="applications" element={<NgoApplicationsPage />} />
+      </Route>
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<AdminDashboard />} />
+        <Route path="tickets" element={<AdminTicketsPage />} />
+      </Route>
+
+      <Route
+        path="/admin/gamification"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminGamification />
+          </ProtectedRoute>
+        }
+      />
 
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

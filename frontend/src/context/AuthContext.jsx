@@ -93,6 +93,12 @@ export function AuthProvider({ children }) {
     }
   };
 
+  useEffect(() => {
+    if (auth?.token) {
+      refreshUser();
+    }
+  }, []);
+
   const value = useMemo(
     () => ({
       user: auth.user,
