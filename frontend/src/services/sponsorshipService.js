@@ -14,3 +14,13 @@ export const redeemSponsorshipCode = async (formData) => {
   const response = await api.post("/sponsorship/redeem", formData);
   return response.data;
 };
+
+export const createSupportTicket = async (formData) => {
+  const response = await api.post("/tickets", formData);
+  return response.data;
+};
+
+export const getMyTickets = async () => {
+  const response = await api.get("/tickets/my");
+  return response.data;
+};
