@@ -1,23 +1,7 @@
-﻿const Lesson = require("../models/Lesson");
+const Lesson = require("../models/Lesson");
 const Course = require("../models/Course");
-const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
+const { uploadToCloudinary, deleteFromCloudinary } = require("../utils/cloudinary");
 const fs = require("fs");
-
-// Helper: extract YouTube embed URL from any YouTube link format
-const getYouTubeEmbedUrl = (url) => {
-  try {
-    let videoId = null;
-    if (url.includes("youtu.be/")) {
-      videoId = url.split("youtu.be/")[1].split("?")[0];
-    } else if (url.includes("youtube.com/watch")) {
-      const params = new URL(url).searchParams;
-      videoId = params.get("v");
-    } else if (url.includes("youtube.com/embed/")) {
-      return url; // already embed format
-    }
-    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
-  } catch { return url; }
-};
 
 const addLesson = async (req, res) => {
   try {
@@ -47,7 +31,7 @@ const getLessons = async (req, res) => {
 
 const getLessonById = async (req, res) => {
   try {
-    const lesson = await Lesson.findById(req.params.id).populate("course", "title _id");
+    const lesson = await Lesson.findById(req.params.id).populate("course", "title");
     if (!lesson) return res.status(404).json({ success: false, message: "Lesson not found" });
     res.status(200).json({ success: true, data: lesson });
   } catch (error) {
@@ -80,7 +64,6 @@ const deleteLesson = async (req, res) => {
   }
 };
 
-// â”€â”€ Upload file to Cloudinary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const uploadResource = async (req, res) => {
   try {
     const lesson = await Lesson.findById(req.params.id);
@@ -104,35 +87,6 @@ const uploadResource = async (req, res) => {
   }
 };
 
-// â”€â”€ Add YouTube / external URL link (no file upload) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const addLinkResource = async (req, res) => {
-  try {
-    const lesson = await Lesson.findById(req.params.id);
-    if (!lesson) return res.status(404).json({ success: false, message: "Lesson not found" });
-    const { name, url, type } = req.body;
-    if (!url || !url.trim()) {
-      return res.status(400).json({ success: false, message: "URL is required" });
-    }
-    // Convert YouTube watch URL to embed URL for in-app playback
-    const embedUrl = (type === "video" || url.includes("youtube") || url.includes("youtu.be"))
-      ? getYouTubeEmbedUrl(url.trim())
-      : url.trim();
-
-    lesson.resources.push({
-      name: name?.trim() || url.trim(),
-      url: embedUrl,
-      publicId: null,       // no Cloudinary for links
-      type: type || "video",
-      size: 0,
-      isDownloadable: false, // external links can't be downloaded
-    });
-    await lesson.save();
-    res.status(201).json({ success: true, data: lesson });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
 const deleteResource = async (req, res) => {
   try {
     const lesson = await Lesson.findById(req.params.id);
@@ -148,9 +102,4 @@ const deleteResource = async (req, res) => {
   }
 };
 
-module.exports = {
-  addLesson, getLessons, getLessonById,
-  updateLesson, deleteLesson,
-  uploadResource, addLinkResource, deleteResource
-};
-
+module.exports = { addLesson, getLessons, getLessonById, updateLesson, deleteLesson, uploadResource, deleteResource };

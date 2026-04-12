@@ -120,6 +120,7 @@ export default function ManageCourses() {
                 <td>
                   <div className="actions">
                     <Link to={`/admin/courses/${c._id}/lessons`} className="btn btn-secondary btn-sm">Lessons</Link>
+                    <Link to={`/admin/assessment/course/${c._id}/missions`} className="btn btn-secondary btn-sm">Assessments</Link>
                     <button className={"btn btn-sm "+(c.isPublished?"btn-warning":"btn-success")} onClick={()=>handlePublish(c._id)}>{c.isPublished?"Unpublish":"Publish"}</button>
                     <button className="btn btn-secondary btn-sm" onClick={()=>openEdit(c)}>Edit</button>
                     <button className="btn btn-danger btn-sm" onClick={()=>handleDelete(c._id,c.title)}>Delete</button>

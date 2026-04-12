@@ -2,24 +2,49 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+
 import StudentDashboard from "./pages/StudentDashboard";
-import NgoDashboard from "./pages/NgoDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
 import StudentProgramsPage from "./pages/StudentProgramsPage";
 import StudentApplyPage from "./pages/StudentApplyPage";
 import StudentRedeemPage from "./pages/StudentRedeemPage";
 import StudentTicketsPage from "./pages/StudentTicketsPage";
 import StudentPaymentPage from "./pages/StudentPaymentPage";
-import StudentLayout from "./layouts/StudentLayout";
-import GamificationDashboard from "./pages/gamification/GamificationDashboard";
-import AdminGamification from "./pages/gamification/AdminGamification";
-import Leaderboard from "./pages/gamification/Leaderboard";
-import ProtectedRoute from "./routes/ProtectedRoute";
-import NgoLayout from "./layouts/NgoLayout";
+
+import NgoDashboard from "./pages/NgoDashboard";
 import NgoProgramsPage from "./pages/NgoProgramsPage";
 import NgoApplicationsPage from "./pages/NgoApplicationsPage";
-import AdminLayout from "./layouts/AdminLayout";
+
 import AdminTicketsPage from "./pages/AdminTicketsPage";
+import AdminGamification from "./pages/gamification/AdminGamification";
+import GamificationDashboard from "./pages/gamification/GamificationDashboard";
+import Leaderboard from "./pages/gamification/Leaderboard";
+
+import Dashboard from "./pages/student/Dashboard";
+import BrowseCourses from "./pages/student/BrowseCourses";
+import CourseDetail from "./pages/student/CourseDetail";
+import MyCourses from "./pages/student/MyCourses";
+import LessonView from "./pages/student/LessonView";
+import SavedResources from "./pages/student/SavedResources";
+import Downloads from "./pages/student/Downloads";
+import MissionsPage from "./pages/student/MissionsPage";
+import QuizPage from "./pages/student/QuizPage";
+import PerformancePage from "./pages/student/PerformancePage";
+import StudentAssessmentHub from "./pages/student/StudentAssessmentHub";
+
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageCourses from "./pages/admin/ManageCourses";
+import ManageLessons from "./pages/admin/ManageLessons";
+import ManageResources from "./pages/admin/ManageResources";
+import AdminAssessmentHub from "./pages/admin/AdminAssessmentHub";
+import AdminMissionsPage from "./pages/admin/AdminMissionsPage";
+import AdminQuizzesPage from "./pages/admin/AdminQuizzesPage";
+
+import StudentLayout from "./layouts/StudentLayout";
+import NgoLayout from "./layouts/NgoLayout";
+import AppLayout from "./components/layout/AppLayout";
+import ProtectedRoute from "./routes/ProtectedRoute";
+
+import "./assessment.css";
 
 function App() {
   return (
@@ -77,25 +102,63 @@ function App() {
       </Route>
 
       <Route
-        path="/admin"
         element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <AdminLayout />
+          <ProtectedRoute allowedRoles={["student"]}>
+            <AppLayout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<AdminDashboard />} />
-        <Route path="tickets" element={<AdminTicketsPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/browse" element={<BrowseCourses />} />
+        <Route path="/course/:id" element={<CourseDetail />} />
+        <Route path="/my-courses" element={<MyCourses />} />
+        <Route path="/lesson/:id" element={<LessonView />} />
+        <Route path="/saved" element={<SavedResources />} />
+        <Route path="/downloads" element={<Downloads />} />
+        <Route path="/assessment" element={<StudentAssessmentHub />} />
+        <Route
+          path="/assessment/course/:courseId/missions"
+          element={<MissionsPage />}
+        />
+        <Route
+          path="/assessment/course/:courseId/quizzes"
+          element={<QuizPage />}
+        />
+        <Route
+          path="/assessment/course/:courseId/performance"
+          element={<PerformancePage />}
+        />
       </Route>
 
       <Route
-        path="/admin/gamification"
         element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <AdminGamification />
+          <ProtectedRoute allowedRoles={["admin", "university"]}>
+            <AppLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/courses" element={<ManageCourses />} />
+        <Route
+          path="/admin/courses/:courseId/lessons"
+          element={<ManageLessons />}
+        />
+        <Route
+          path="/admin/lessons/:lessonId/resources"
+          element={<ManageResources />}
+        />
+        <Route path="/admin/assessment" element={<AdminAssessmentHub />} />
+        <Route
+          path="/admin/assessment/course/:courseId/missions"
+          element={<AdminMissionsPage />}
+        />
+        <Route
+          path="/admin/assessment/course/:courseId/quizzes"
+          element={<AdminQuizzesPage />}
+        />
+        <Route path="/admin/tickets" element={<AdminTicketsPage />} />
+        <Route path="/admin/gamification" element={<AdminGamification />} />
+      </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

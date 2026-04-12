@@ -77,7 +77,10 @@ export default function MyCourses() {
                 </div>
                 <div className="enrolled-right">
                   <span className={"badge "+statusColor}>{e.completionStatus.replace("_"," ")}</span>
-                  <Link to={`/course/${c._id}`} className="btn btn-primary btn-sm">Open Course</Link>
+                  <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"flex-end"}}>
+                    <Link to={`/course/${c._id}`} className="btn btn-primary btn-sm">Open Course</Link>
+                    <Link to={`/assessment/course/${c._id}/missions`} className="btn btn-secondary btn-sm">Assessments</Link>
+                  </div>
                 </div>
               </div>
             );

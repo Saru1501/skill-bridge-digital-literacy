@@ -1,14 +1,24 @@
 const Stripe = require("stripe");
 const Payment = require("../models/Payment");
 
+const getStripeClient = () => {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return null;
+  }
+
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+};
+
 // Student: create payment intent
 const createPaymentIntent = async (req, res) => {
   try {
-    if (!process.env.STRIPE_SECRET_KEY) {
-      return res.status(500).json({ message: "Stripe is not configured" });
-    }
+    const stripe = getStripeClient();
 
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    if (!stripe) {
+      return res.status(503).json({
+        message: "Payments are not configured. Set STRIPE_SECRET_KEY to enable Stripe.",
+      });
+    }
 
     const { amountLKR, purpose } = req.body;
 
@@ -21,6 +31,8 @@ const createPaymentIntent = async (req, res) => {
       return res.status(400).json({ message: "amountLKR must be a number >= 0" });
     }
 
+    // Stripe uses smallest currency unit. LKR is typically treated as 2 decimal places by Stripe,
+    // but for simplicity we’ll treat input as a whole amount and convert to cents-like unit.
     const stripeAmount = Math.round(amount * 100);
 
     const paymentIntent = await stripe.paymentIntents.create({
