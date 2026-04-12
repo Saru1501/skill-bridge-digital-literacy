@@ -5,6 +5,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { GamificationProvider } from "./context/GamificationContext";
 import App from "./App";
 import "./index.css";
+import App from "./App";
 import "./styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(

@@ -2,37 +2,19 @@
   "name": "skillbridge-frontend",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "dependencies": {
     "axios": "^1.6.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.2",
-    "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10.4.27",
-    "postcss": "^8.5.9",
-    "tailwindcss": "^4.2.2",
-    "vite": "^5.4.10"
+    "react-router-dom": "^6.22.0",
+    "react-scripts": "5.0.1"
   },
   "scripts": {
-    "dev": "vite",
-    "start": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "start": "react-scripts start",
+    "build": "react-scripts build"
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "production": [">0.2%","not dead","not op_mini all"],
+    "development": ["last 1 chrome version","last 1 firefox version","last 1 safari version"]
   }
 }
