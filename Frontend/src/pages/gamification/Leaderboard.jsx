@@ -1,115 +1,102 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { gamificationService } from "../../services/gamificationService";
-import useAuth from "../../hooks/useAuth";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Leaderboard() {
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [myRank, setMyRank] = useState(null);
+  const { user } = useAuth();
+  const [board,   setBoard]   = useState([]);
+  const [myRank,  setMyRank]  = useState(null);
   const [loading, setLoading] = useState(true);
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchData();
+    const load = async () => {
+      try {
+        const [lb, rank] = await Promise.all([
+          gamificationService.getLeaderboard(20),
+          gamificationService.getMyRank(),
+        ]);
+        setBoard(lb.data.data || []);
+        setMyRank(rank.data);
+      } catch {} finally { setLoading(false); }
+    };
+    load();
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
+  const medal = (r) => r===1?"🥇":r===2?"🥈":r===3?"🥉":null;
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [lbRes, rankRes] = await Promise.all([
-        gamificationService.getLeaderboard(20),
-        gamificationService.getMyRank(),
-      ]);
-      setLeaderboard(lbRes.data.data || []);
-      setMyRank(rankRes.data);
-    } catch (err) {
-      console.error("Error fetching leaderboard:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getRankBadge = (rank) => {
-    if (rank === 1) return "🥇";
-    if (rank === 2) return "🥈";
-    if (rank === 3) return "🥉";
-    return rank;
-  };
-
-  const getRankStyle = (rank) => {
-    if (rank === 1) return { backgroundColor: '#fff5f5', border: '2px solid #e60023' };
-    if (rank === 2) return { backgroundColor: '#f6f6f3' };
-    if (rank === 3) return { backgroundColor: '#fff8f0' };
-    return { backgroundColor: 'white' };
-  };
+  if (loading) return <div className="page-loading"><div className="spinner"></div></div>;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f6f6f3' }}>
-      <nav className="nav-glass">
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-            <Link to="/student" style={{ fontSize: '20px', fontWeight: 700, color: '#ff385c' }}>SkillBridge</Link>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <Link to="/student" style={{ padding: '8px 16px', borderRadius: '20px', color: '#211922', fontWeight: 500, fontSize: '14px' }}>Home</Link>
-              <Link to="/student/gamification" style={{ padding: '8px 16px', borderRadius: '20px', color: '#211922', fontWeight: 500, fontSize: '14px' }}>Activity</Link>
-              <Link to="/student/leaderboard" style={{ padding: '8px 16px', borderRadius: '20px', backgroundColor: '#e5e5e0', color: '#211922', fontWeight: 600, fontSize: '14px' }}>Leaderboard</Link>
+    <div>
+      <div className="section-header" style={{marginBottom:24}}>
+        <div>
+          <h1 className="section-title">Leaderboard</h1>
+          <p className="section-sub">Top learners ranked by total points earned.</p>
+        </div>
+        <Link to="/student/gamification" className="btn btn-secondary">My Achievements</Link>
+      </div>
+
+      {/* My rank card */}
+      {myRank && (
+        <div className="card" style={{marginBottom:20,background:"linear-gradient(135deg,#0F172A,#1E3A5F)",border:"none"}}>
+          <div className="card-body" style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"20px 28px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:16}}>
+              <div style={{width:48,height:48,borderRadius:"50%",background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:18}}>
+                #{myRank?.rank || "–"}
+              </div>
+              <div>
+                <div style={{color:"#fff",fontWeight:700,fontSize:16}}>Your Ranking</div>
+                <div style={{color:"rgba(255,255,255,0.6)",fontSize:13}}>{user?.name}</div>
+              </div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{color:"#FCD34D",fontWeight:800,fontSize:28}}>{myRank?.totalPoints || 0}</div>
+              <div style={{color:"rgba(255,255,255,0.6)",fontSize:12}}>Total Points</div>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ color: '#62625b', fontSize: '14px' }}>{user?.name}</span>
-            <button onClick={handleLogout} className="btn-primary" style={{ padding: '8px 16px', fontSize: '13px' }}>Logout</button>
-          </div>
         </div>
-      </nav>
+      )}
 
-      <div className="container" style={{ padding: '32px 16px', maxWidth: '600px' }}>
-        <h2 style={{ fontSize: '32px', fontWeight: 600, textAlign: 'center', marginBottom: '24px' }}>🏆 Leaderboard</h2>
-
-        {myRank && (
-          <div className="card" style={{ textAlign: 'center', padding: '32px', marginBottom: '24px', backgroundColor: '#e60023', color: 'white' }}>
-            <div style={{ fontSize: '14px', opacity: 0.9 }}>Your Current Rank</div>
-            <div style={{ fontSize: '56px', fontWeight: 700 }}>#{myRank.rank || "-"}</div>
-            <div style={{ fontSize: '16px', opacity: 0.9 }}>{myRank.totalPoints} points</div>
-          </div>
-        )}
-
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#62625b' }}>Loading...</div>
-        ) : (
-          <div className="card" style={{ overflow: 'hidden' }}>
-            {leaderboard.map((entry) => (
-              <div
-                key={entry._id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '16px',
-                  borderBottom: '1px solid #e5e5e0',
-                  ...getRankStyle(entry.rank),
-                }}
-              >
-                <div style={{ width: '48px', textAlign: 'center', fontSize: '24px', fontWeight: 700 }}>{getRankBadge(entry.rank)}</div>
-                <div style={{ flex: 1, marginLeft: '16px' }}>
-                  <div style={{ fontWeight: 600, color: '#211922' }}>{entry.student?.name || "Unknown"}</div>
-                  <div style={{ fontSize: '13px', color: '#62625b' }}>{entry.student?.email}</div>
-                </div>
-                <div style={{ fontSize: '20px', fontWeight: 700, color: '#e60023' }}>{entry.totalPoints}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {leaderboard.length === 0 && !loading && (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#62625b' }}>
-            No users on the leaderboard yet.
-          </div>
-        )}
+      <div className="table-wrap">
+        <table className="table">
+          <thead>
+            <tr><th style={{width:60}}>Rank</th><th>Student</th><th>Points</th><th>Badges</th><th>Courses</th></tr>
+          </thead>
+          <tbody>
+            {board.length === 0 && (
+              <tr><td colSpan={5} style={{textAlign:"center",color:"#94A3B8",padding:40}}>No data yet. Complete courses to appear here!</td></tr>
+            )}
+            {board.map((entry, i) => {
+              const rank = i + 1;
+              const isMe = entry.student?._id === user?._id;
+              return (
+                <tr key={i} style={isMe?{background:"#EFF6FF"}:{}}>
+                  <td>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"center",width:36,height:36,borderRadius:"50%",
+                      background:rank<=3?"#FEF3C7":"#F1F5F9",fontWeight:700,fontSize:rank<=3?20:14,color:rank<=3?"#D97706":"#64748B"}}>
+                      {medal(rank) || rank}
+                    </div>
+                  </td>
+                  <td>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}>
+                      <div style={{width:34,height:34,borderRadius:"50%",background:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:13,flexShrink:0}}>
+                        {entry.student?.name?.charAt(0)?.toUpperCase() || "?"}
+                      </div>
+                      <div>
+                        <div style={{fontWeight:600}}>{entry.student?.name || "Anonymous"}</div>
+                        {isMe && <div style={{fontSize:11,color:"#2563EB",fontWeight:600}}>You</div>}
+                      </div>
+                    </div>
+                  </td>
+                  <td><span className="badge badge-yellow" style={{fontSize:13}}>{entry.totalPoints || 0} pts</span></td>
+                  <td style={{color:"#64748B"}}>{entry.badgeCount || 0}</td>
+                  <td style={{color:"#64748B"}}>{entry.courseCount || 0}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );

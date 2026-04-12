@@ -12,12 +12,15 @@ export default function Dashboard() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await getMyEnrollments();
-        const list = res.data.data || [];
+        const res  = await getMyEnrollments();
+        const list = (res.data.data || []).filter(e => e.course && e.course._id);
         setEnrollments(list);
         const prog = {};
         await Promise.all(list.map(async e => {
-          try { const r = await getCourseProgress(e.course._id); prog[e.course._id] = r.data.data; } catch {}
+          try {
+            const r = await getCourseProgress(e.course._id);
+            prog[e.course._id] = r.data.data;
+          } catch {}
         }));
         setProgresses(prog);
       } catch {} finally { setLoading(false); }
@@ -27,6 +30,9 @@ export default function Dashboard() {
 
   const completed  = enrollments.filter(e => e.completionStatus === "completed").length;
   const inProgress = enrollments.filter(e => e.completionStatus === "in_progress").length;
+  const avgProgress = enrollments.length > 0
+    ? Math.round(Object.values(progresses).reduce((a, p) => a + (p?.completionPercentage || 0), 0) / enrollments.length)
+    : 0;
 
   if (loading) return <div className="page-loading"><div className="spinner"></div></div>;
 
@@ -66,10 +72,7 @@ export default function Dashboard() {
           <div className="stat-icon purple">
             <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
           </div>
-          <div className="stat-info">
-            <div className="stat-value">{enrollments.length > 0 ? Math.round(Object.values(progresses).reduce((a, p) => a + (p?.completionPercentage || 0), 0) / enrollments.length) : 0}%</div>
-            <div className="stat-label">Avg. Progress</div>
-          </div>
+          <div className="stat-info"><div className="stat-value">{avgProgress}%</div><div className="stat-label">Avg. Progress</div></div>
         </div>
       </div>
 
@@ -85,7 +88,7 @@ export default function Dashboard() {
               <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
             </div>
             <h3>No courses yet</h3>
-            <p>Start learning by enrolling in a course below.</p>
+            <p>Start learning by enrolling in a course.</p>
             <Link to="/browse" className="btn btn-primary">Browse Courses</Link>
           </div>
         </div>
@@ -93,7 +96,8 @@ export default function Dashboard() {
         <div className="enrolled-list">
           {enrollments.slice(0, 5).map(e => {
             const c = e.course;
-            const p = progresses[c._id];
+            if (!c || !c._id) return null;
+            const p   = progresses[c._id];
             const pct = p?.completionPercentage ?? 0;
             return (
               <div className="enrolled-item" key={e._id}>
@@ -110,11 +114,13 @@ export default function Dashboard() {
                   <div className="progress-wrap" style={{width:"100%",maxWidth:400}}>
                     <div className="progress-bar" style={{width:pct+"%"}}></div>
                   </div>
-                  <p style={{fontSize:12,color:"#94A3B8",marginTop:4}}>{pct}% complete â€” {p?.completedLessons?.length ?? 0} / {c.totalLessons} lessons</p>
+                  <p style={{fontSize:12,color:"#94A3B8",marginTop:4}}>
+                    {pct}% complete &mdash; {p?.completedLessons?.length ?? 0} / {c.totalLessons} lessons
+                  </p>
                 </div>
                 <div className="enrolled-right">
                   <span className={"badge " + (e.completionStatus==="completed"?"badge-green":e.completionStatus==="in_progress"?"badge-yellow":"badge-gray")}>
-                    {e.completionStatus.replace("_"," ")}
+                    {e.completionStatus?.replace("_"," ")}
                   </span>
                   <Link to={`/course/${c._id}`} className="btn btn-primary btn-sm">Continue</Link>
                 </div>

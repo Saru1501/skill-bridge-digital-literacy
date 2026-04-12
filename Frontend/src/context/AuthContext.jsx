@@ -5,103 +5,67 @@ import axios from "axios";
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [auth, setAuth] = useState({ user: null, token: null });
+  const [auth,    setAuth]    = useState({ user: null, token: null });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     try {
-      const storedAuth = localStorage.getItem("skillbridge_auth");
-      const token = localStorage.getItem("token");
-      const user = localStorage.getItem("user");
+      // Support both storage formats
+      const stored = localStorage.getItem("skillbridge_auth");
+      const token  = localStorage.getItem("token");
+      const user   = localStorage.getItem("user");
 
-      if (storedAuth) {
-        const parsed = JSON.parse(storedAuth);
+      if (stored) {
+        const parsed = JSON.parse(stored);
         if (parsed?.token && parsed?.user) {
           setAuth(parsed);
           axios.defaults.headers.common["Authorization"] = `Bearer ${parsed.token}`;
         }
       } else if (token && user && user !== "undefined" && user !== "null") {
         const parsedUser = JSON.parse(user);
-        const parsed = { token, user: parsedUser };
-        setAuth(parsed);
-        localStorage.setItem("skillbridge_auth", JSON.stringify(parsed));
+        const next = { token, user: parsedUser };
+        setAuth(next);
+        localStorage.setItem("skillbridge_auth", JSON.stringify(next));
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       }
     } catch {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       localStorage.removeItem("skillbridge_auth");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   }, []);
 
   const persist = (token, user) => {
-    const nextAuth = { token, user };
-    setAuth(nextAuth);
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("skillbridge_auth", JSON.stringify(nextAuth));
+    const next = { token, user };
+    setAuth(next);
+    localStorage.setItem("token",           token);
+    localStorage.setItem("user",            JSON.stringify(user));
+    localStorage.setItem("skillbridge_auth", JSON.stringify(next));
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   };
 
-  const login = async (emailOrForm, password) => {
-    const isFormMode = typeof emailOrForm === "object" && emailOrForm !== null;
-    const email = isFormMode ? emailOrForm.email : emailOrForm;
-
+  // login(email, password) → returns user object directly
+  const login = async (email, password) => {
     setLoading(true);
     try {
-      const res = await authLogin(email, password ?? emailOrForm?.password);
-      const user = res?.data?.data;
+      const res   = await authLogin(email, password);
+      const user  = res?.data?.data;
       const token = res?.data?.token;
       persist(token, user);
-
-      if (isFormMode) {
-        return { success: true, user };
-      }
       return user;
-    } catch (error) {
-      if (isFormMode) {
-        return {
-          success: false,
-          message: error.response?.data?.message || "Login failed",
-        };
-      }
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  const register = async (nameOrForm, email, password, role = "student") => {
-    const isFormMode = typeof nameOrForm === "object" && nameOrForm !== null;
-    const name = isFormMode ? nameOrForm.name : nameOrForm;
-    const regEmail = isFormMode ? nameOrForm.email : email;
-    const regPassword = isFormMode ? nameOrForm.password : password;
-    const regRole = isFormMode ? (nameOrForm.role || "student") : role;
-
+  // register(name, email, password, role) → returns user object directly
+  const register = async (name, email, password, role = "student") => {
     setLoading(true);
     try {
-      const res = await authRegister(name, regEmail, regPassword, regRole);
-      const user = res?.data?.data;
+      const res   = await authRegister(name, email, password, role);
+      const user  = res?.data?.data;
       const token = res?.data?.token;
       persist(token, user);
-
-      if (isFormMode) {
-        return { success: true, user };
-      }
       return user;
-    } catch (error) {
-      if (isFormMode) {
-        return {
-          success: false,
-          message: error.response?.data?.message || "Registration failed",
-        };
-      }
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const logout = () => {
@@ -112,26 +76,27 @@ export function AuthProvider({ children }) {
     delete axios.defaults.headers.common["Authorization"];
   };
 
-  const role = auth.user?.role?.toLowerCase();
-  const isAdmin = role === "admin" || role === "university";
+  const role      = auth.user?.role?.toLowerCase();
+  const isAdmin   = role === "admin" || role === "university";
   const isStudent = role === "student";
 
-  const value = useMemo(
-    () => ({
-      user: auth.user,
-      token: auth.token,
-      isAuthenticated: !!auth.token,
-      loading,
-      login,
-      register,
-      logout,
-      isAdmin,
-      isStudent,
-    }),
-    [auth, loading, isAdmin, isStudent]
-  );
+  const value = useMemo(() => ({
+    user:            auth.user,
+    token:           auth.token,
+    isAuthenticated: !!auth.token,
+    loading,
+    login,
+    register,
+    logout,
+    isAdmin,
+    isStudent,
+  }), [auth, loading]);
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => useContext(AuthContext);

@@ -1,67 +1,84 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+import { useAuth } from "../context/AuthContext";
+
+const ngoLinks = [
+  { to: "/ngo",               label: "Dashboard",              end: true,
+    icon: <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg> },
+  { to: "/ngo/programs",      label: "Manage Programs",
+    icon: <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> },
+  { to: "/ngo/applications",  label: "Applications",
+    icon: <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg> },
+];
 
 export default function NgoLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-  logout();
-  navigate("/login", { replace: true });
-};
-
-  const linkClass = ({ isActive }) =>
-    `block rounded-lg px-4 py-3 font-medium transition ${
-      isActive ? "bg-black text-white" : "text-gray-700 hover:bg-gray-100"
-    }`;
+  const handleLogout = () => { logout(); navigate("/login", { replace: true }); };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="mx-auto grid min-h-screen max-w-7xl grid-cols-1 md:grid-cols-[260px_1fr]">
-        <aside className="border-r bg-white p-6">
-          <h1 className="mb-2 text-2xl font-bold">Skill Bridge</h1>
-          <p className="mb-6 text-sm text-gray-500">NGO Panel</p>
-
-          <div className="mb-6 rounded-xl bg-gray-50 p-4 text-left">
-            <p className="text-sm text-gray-500">Logged in as</p>
-            <p className="font-semibold text-gray-900">{user?.name || "NGO"}</p>
-            <p className="text-sm text-gray-500">{user?.email}</p>
+    <div className="layout">
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <div className="brand-logo">
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
           </div>
+          <span className="brand-name">SkillBridge</span>
+        </div>
 
-          <nav className="space-y-2 text-left">
-            <NavLink to="/ngo" end className={linkClass}>
-              Dashboard
+        <nav className="sidebar-nav">
+          <div className="sidebar-section">
+            <p className="sidebar-label">NGO Panel</p>
+          </div>
+          {ngoLinks.map(l => (
+            <NavLink key={l.to} to={l.to} end={l.end}
+              className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}>
+              {l.icon}
+              <span>{l.label}</span>
             </NavLink>
-            <NavLink to="/ngo/programs" className={linkClass}>
-              Manage Programs
-            </NavLink>
-            <NavLink to="/ngo/applications" className={linkClass}>
-              Sponsorship Applications
-            </NavLink>
-          </nav>
+          ))}
+        </nav>
 
-          <button
-            onClick={handleLogout}
-            className="mt-8 w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-600 hover:bg-red-100"
-          >
-            Logout
+        <div className="sidebar-footer">
+          <div className="sidebar-user">
+            <div className="user-avatar">{user?.name?.charAt(0)?.toUpperCase() || "N"}</div>
+            <div className="user-info">
+              <p className="user-name">{user?.name || "NGO User"}</p>
+              <p className="user-role">NGO</p>
+            </div>
+          </div>
+          <button className="logout-btn" onClick={handleLogout}>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+            Sign Out
           </button>
-        </aside>
+        </div>
+      </aside>
 
-        <main className="p-6 md:p-8">
-  <div className="mb-6 flex items-center justify-between rounded-2xl bg-white px-5 py-4 shadow-sm">
-    <div>
-      <p className="text-sm text-gray-500">Role</p>
-      <p className="font-semibold text-gray-900 capitalize">{user?.role}</p>
-    </div>
-    <div className="text-right">
-      <p className="text-sm text-gray-500">Session</p>
-      <p className="font-semibold text-green-600">Active</p>
-    </div>
-  </div>
-
-  <Outlet />
-</main>
+      <div className="main-content">
+        <header className="topbar">
+          <div className="topbar-left">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" style={{color:"#94A3B8"}}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+            <span className="topbar-title">NGO Management</span>
+          </div>
+          <div className="topbar-right">
+            <span className="topbar-badge">NGO</span>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <div style={{width:32,height:32,borderRadius:"50%",background:"#7C3AED",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:13,fontWeight:700}}>
+                {user?.name?.charAt(0)?.toUpperCase()}
+              </div>
+              <span style={{fontSize:13,fontWeight:600,color:"#475569"}}>{user?.name}</span>
+            </div>
+          </div>
+        </header>
+        <main className="page-wrap">
+          <Outlet />
+        </main>
       </div>
     </div>
   );
