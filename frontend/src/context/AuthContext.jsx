@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
       const res = await loginUser(formData);
 
       const newAuth = {
-        user: res.data,
+        user: res.user,
         token: res.token,
       };
 
@@ -34,12 +34,15 @@ export function AuthProvider({ children }) {
 
       return {
         success: true,
-        user: res.data,
+        user: res.user,
       };
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || "Login failed",
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "Login failed",
       };
     } finally {
       setLoading(false);
@@ -52,7 +55,7 @@ export function AuthProvider({ children }) {
       const res = await registerUser(formData);
 
       const newAuth = {
-        user: res.data,
+        user: res.user,
         token: res.token,
       };
 
@@ -61,12 +64,15 @@ export function AuthProvider({ children }) {
 
       return {
         success: true,
-        user: res.data,
+        user: res.user,
       };
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || "Registration failed",
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "Registration failed",
       };
     } finally {
       setLoading(false);
@@ -82,11 +88,11 @@ export function AuthProvider({ children }) {
     if (!auth?.token) return;
 
     try {
-      const res = await getMe();
+      const user = await getMe();
 
       setAuth((prev) => ({
         ...prev,
-        user: res.data || res.user || prev.user,
+        user: user || prev.user,
       }));
     } catch (error) {
       logout();

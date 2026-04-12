@@ -20,28 +20,28 @@ export default function LoginPage() {
     }));
   };
 
-  const getDashboardPath = (role) => {
-    const r = role?.toLowerCase();
-    if (r === "admin") return "/admin";
-    if (r === "ngo") return "/ngo";
-    if (r === "student") return "/student";
-    return "/login";
-  };
+const getDashboardPath = (role) => {
+  if (role === "student") return "/student";
+  if (role === "ngo") return "/ngo";
+  if (role === "admin") return "/admin";
+  return "/login";
+};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    const result = await login(formData);
+  const result = await login(formData);
 
-    if (!result.success) {
-      setError(result.message);
-      return;
-    }
+  if (!result.success) {
+    setError(result.message);
+    return;
+  }
 
-    const role = result.user?.role;
-    navigate(getDashboardPath(role), { replace: true });
-  };
+  const role = result.user?.role?.toLowerCase();
+
+  navigate(getDashboardPath(role), { replace: true });
+};
 
   return (
     <div
