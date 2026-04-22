@@ -11,49 +11,46 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-
 // Health check
 app.get("/", (req, res) => res.status(200).json({ success: true, message: "SkillBridge API running" }));
 
-// Auth
+// ── Auth ──────────────────────────────────────────────────────────────────────
 app.use("/api/auth", require("./src/routes/authRoutes"));
 
-// Component 1: Learning Management
-app.use("/api/courses", require("./src/routes/courseRoutes"));
-app.use("/api/lessons", require("./src/routes/lessonRoutes"));
+// ── Component 1: Learning Management & Offline Delivery ──────────────────────
+app.use("/api/courses",     require("./src/routes/courseRoutes"));
+app.use("/api/lessons",     require("./src/routes/lessonRoutes"));
 app.use("/api/enrollments", require("./src/routes/enrollmentRoutes"));
-app.use("/api/progress", require("./src/routes/progressRoutes"));
-app.use("/api/saved", require("./src/routes/savedCourseRoutes"));
+app.use("/api/progress",    require("./src/routes/progressRoutes"));
+app.use("/api/saved",       require("./src/routes/savedCourseRoutes"));
 
-// Component 2: Assessments & Practice Missions
-app.use("/api/missions", require("./src/routes/missionRoutes"));
-app.use("/api/mission-submissions", require("./src/routes/missionSubmissionRoutes"));
-app.use("/api/quizzes", require("./src/routes/quizRoutes"));
-app.use("/api/quiz-attempts", require("./src/routes/performanceRoutes"));
+// ── Component 2: Assessment & Evaluation ─────────────────────────────────────
+app.use("/api/missions",    require("./src/routes/missionRoutes"));
+app.use("/api/submissions", require("./src/routes/missionSubmissionRoutes"));
+app.use("/api/quizzes",     require("./src/routes/quizRoutes"));
+app.use("/api/performance", require("./src/routes/performanceRoutes"));
 
-// Component 3: Gamification
-app.use("/api/badges", require("./src/routes/badgeRoutes"));
-app.use("/api/points", require("./src/routes/pointsRoutes"));
-app.use("/api/certificates", require("./src/routes/certificateRoutes"));
-app.use("/api/leaderboard", require("./src/routes/leaderboardRoutes"));
+// ── Component 3: Gamification, Rewards & Certification ───────────────────────
+app.use("/api/badges",        require("./src/routes/badgeRoutes"));
+app.use("/api/points",        require("./src/routes/pointsRoutes"));
+app.use("/api/certificates",  require("./src/routes/certificateRoutes"));
+app.use("/api/leaderboard",   require("./src/routes/leaderboardRoutes"));
 app.use("/api/fee-reduction", require("./src/routes/feeReductionRoutes"));
-app.use("/api/gamification", require("./src/routes/gamificationRoutes"));
+app.use("/api/gamification",  require("./src/routes/gamificationRoutes"));
 
-// Component 4: Sponsorship
+// ── Component 4: Sponsorship, Payments & Support ─────────────────────────────
 app.use("/api/sponsorship", require("./src/routes/sponsorshipRoutes"));
-app.use("/api/tickets", require("./src/routes/ticketRoutes"));
-app.use("/api/payments", require("./src/routes/paymentRoutes"));
+app.use("/api/tickets",     require("./src/routes/ticketRoutes"));
+app.use("/api/payments",    require("./src/routes/paymentRoutes"));
 
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.method} ${req.originalUrl} not found` });
 });
 
-// DB connection - returns promise so tests can await it
 const dbReady = connectDB();
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 3001;
 
 if (require.main === module) {
   dbReady.then(() => {

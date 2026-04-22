@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SkillBridge - Digital Literacy Platform
 
 SkillBridge is a gamified digital literacy platform for rural youth. The system includes learning management with offline access, assessment engine, gamification and certification, and sponsorship support.
@@ -182,3 +183,27 @@ npm run dev
 ## License
 
 ISC
+=======
+# SkillBridge Digital Literacy
+
+## Project Structure
+
+- `Backend/` - Node.js/Express API, models, routes, tests, and backend dependencies.
+- `Frontend/` - Frontend application (place all UI/client files here).
+
+## Backend Quick Start
+
+```bash
+cd Backend
+npm install
+npm run dev
+```
+
+## Backend Environment
+
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/SkillBridge
+JWT_SECRET=skillbridge_secret_key
+```
+>>>>>>> 3943b2da5c340b51f92b4fb3015a8d9544a27dff

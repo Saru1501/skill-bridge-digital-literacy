@@ -43,7 +43,7 @@ const protect = async (req, res, next) => {
   }
 };
 
-// Reusable Role-Based Authorization
+// Role-Based Authorization (Reusable)
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !req.user.role) {
@@ -53,7 +53,10 @@ const authorize = (...roles) => {
       });
     }
 
-    if (!roles.includes(req.user.role)) {
+    const userRole = String(req.user.role).toLowerCase();
+    const allowedRoles = roles.map((role) => String(role).toLowerCase());
+
+    if (!allowedRoles.includes(userRole)) {
       return res.status(403).json({
         success: false,
         message: `Forbidden: ${req.user.role} role does not have access`,
@@ -64,16 +67,11 @@ const authorize = (...roles) => {
   };
 };
 
-// Admin Only Middleware
-const adminOnly = (req, res, next) => {
-  if (req.user && req.user.role === "admin") {
-    next();
-  } else {
-    res.status(403).json({
-      success: false,
-      message: "Access denied. Admins only.",
-    });
-  }
-};
+// Optional Admin Only (Built using authorize)
+const adminOnly = authorize("Admin");
 
-module.exports = { protect, authorize, adminOnly };
+module.exports = {
+  protect,
+  authorize,
+  adminOnly,
+};
