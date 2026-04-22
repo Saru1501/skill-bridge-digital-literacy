@@ -1,5 +1,5 @@
 const Certificate = require("../models/Certificate");
-const { v4: uuidv4 } = require("uuid");
+const { randomUUID } = require("crypto");
  
 const generateCertificate = async (req, res) => {
   try {
@@ -16,7 +16,7 @@ const generateCertificate = async (req, res) => {
     }
  
     const certificateNumber =
-      `CERT-${uuidv4().split("-")[0].toUpperCase()}-${Date.now()}`;
+      `CERT-${randomUUID().split("-")[0].toUpperCase()}-${Date.now()}`;
  
     const certificate = await Certificate.create({
       student: studentId,

@@ -26,8 +26,8 @@ export default function StudentAssessmentHub() {
   }
 
   return (
-    <div>
-      <div className="section-header" style={{ marginBottom: 28 }}>
+    <div className="assessment-hub-page">
+      <div className="section-header assessment-hub-page__hero" style={{ marginBottom: 28 }}>
         <div>
           <h1 className="section-title">Assessment & Evaluation Engine</h1>
           <p className="section-sub">Open missions, quizzes, and performance tracking for your enrolled courses.</p>

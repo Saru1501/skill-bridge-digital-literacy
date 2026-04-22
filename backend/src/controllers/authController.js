@@ -18,12 +18,73 @@ const sanitizeUser = (user) => ({
   role: user.role,
 });
 
+const formatAuthError = (error) => {
+  if (error?.code === 11000) {
+    return { status: 409, message: "User already exists" };
+  }
+
+  if (error?.name === "ValidationError") {
+    const message = Object.values(error.errors || {})
+      .map((entry) => entry.message)
+      .filter(Boolean)
+      .join(", ");
+
+    return {
+      status: 400,
+      message: message || "Invalid user data",
+    };
+  }
+
+  if (
+    error?.name === "MongooseServerSelectionError" ||
+    String(error?.message || "").includes("buffering timed out") ||
+    String(error?.message || "").includes("ECONNREFUSED")
+  ) {
+    return {
+      status: 503,
+      message: "Database connection is not available. Check MongoDB and try again.",
+    };
+  }
+
+  if (String(error?.message || "").includes("JWT_SECRET")) {
+    return {
+      status: 500,
+      message: "JWT configuration is missing. Check backend .env settings.",
+    };
+  }
+
+  if (
+    error?.name === "MongooseServerSelectionError" ||
+    String(error?.message || "").includes("buffering timed out") ||
+    String(error?.message || "").includes("ECONNREFUSED")
+  ) {
+    return {
+      status: 503,
+      message: "Database connection is not available. Check MongoDB and try again.",
+    };
+  }
+
+  if (String(error?.message || "").includes("JWT_SECRET")) {
+    return {
+      status: 500,
+      message: "JWT configuration is missing. Check backend .env settings.",
+    };
+  }
+
+  return {
+    status: 500,
+    message: error?.message || "Server error",
+  };
+};
+
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    const normalizedName = String(name || "").trim();
+    const normalizedEmail = String(email || "").trim().toLowerCase();
     const normalizedRole = role ? ROLE_MAP[String(role).toLowerCase()] : "Student";
 
-    if (!name || !email || !password) {
+    if (!normalizedName || !normalizedEmail || !password) {
       return res.status(400).json({ message: "Name, email, and password are required" });
     }
 
@@ -33,7 +94,7 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
     }
@@ -41,8 +102,8 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      name,
-      email: email.toLowerCase(),
+      name: normalizedName,
+      email: normalizedEmail,
       password: hashedPassword,
       role: normalizedRole,
     });
@@ -53,7 +114,9 @@ const registerUser = async (req, res) => {
       data: sanitizeUser(user),
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message || "Server error" });
+    console.error("registerUser failed:", error);
+    const { status, message } = formatAuthError(error);
+    return res.status(status).json({ message });
   }
 };
 
@@ -83,7 +146,9 @@ const loginUser = async (req, res) => {
       data: sanitizeUser(user),
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message || "Server error" });
+    console.error("registerUser failed:", error);
+    const { status, message } = formatAuthError(error);
+    return res.status(status).json({ message });
   }
 };
 
@@ -91,7 +156,8 @@ const getMe = async (req, res) => {
   try {
     return res.status(200).json({ data: req.user });
   } catch (error) {
-    return res.status(500).json({ message: error.message || "Server error" });
+    const { status, message } = formatAuthError(error);
+    return res.status(status).json({ message });
   }
 };
 
