@@ -7,7 +7,14 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+// CORS configuration to allow frontend origin, credentials, and custom headers
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+  allowedHeaders: ['Authorization', 'Content-Type'],
+  exposedHeaders: ['Authorization', 'Content-Type'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
