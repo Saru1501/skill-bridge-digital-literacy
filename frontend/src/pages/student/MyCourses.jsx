@@ -13,8 +13,8 @@ export default function MyCourses() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res  = await getMyEnrollments();
-        const list = (res.data.data || []).filter(e => e.course && e.course._id);
+        const res = await getMyEnrollments();
+        const list = res.data.data || [];
         setEnrollments(list);
         const prog = {};
         await Promise.all(list.map(async e => {
@@ -26,7 +26,7 @@ export default function MyCourses() {
     load();
   }, []);
 
-  const filtered = filter === "all" ? enrollments : enrollments.filter(e => e.completionStatus === filter);
+  const filtered = filter==="all" ? enrollments : enrollments.filter(e => e.completionStatus===filter);
 
   if (loading) return <div className="page-loading"><div className="spinner"></div></div>;
 
@@ -57,10 +57,7 @@ export default function MyCourses() {
       ) : (
         <div className="enrolled-list">
           {filtered.map(e => {
-            const c = e.course;
-            if (!c || !c._id) return null;
-            const p   = progresses[c._id];
-            const pct = p?.completionPercentage ?? 0;
+            const c = e.course; const p = progresses[c._id]; const pct = p?.completionPercentage ?? 0;
             const statusColor = e.completionStatus==="completed"?"badge-green":e.completionStatus==="in_progress"?"badge-yellow":"badge-gray";
             return (
               <div className="enrolled-item" key={e._id}>
@@ -72,17 +69,14 @@ export default function MyCourses() {
                   <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
                     <span className="badge badge-blue">{c.category}</span>
                     <span className="badge badge-gray">{c.level}</span>
-                    <span className="badge badge-gray">{c.totalLessons} lessons</span>
                   </div>
                   <div className="progress-wrap" style={{maxWidth:360}}>
                     <div className="progress-bar" style={{width:pct+"%"}}></div>
                   </div>
-                  <p style={{fontSize:12,color:"#94A3B8",marginTop:4}}>
-                    {pct}% &mdash; {p?.completedLessons?.length ?? 0}/{c.totalLessons} lessons
-                  </p>
+                  <p style={{fontSize:12,color:"#94A3B8",marginTop:4}}>{pct}% â€” {p?.completedLessons?.length ?? 0}/{c.totalLessons} lessons</p>
                 </div>
                 <div className="enrolled-right">
-                  <span className={"badge "+statusColor}>{e.completionStatus?.replace("_"," ")}</span>
+                  <span className={"badge "+statusColor}>{e.completionStatus.replace("_"," ")}</span>
                   <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"flex-end"}}>
                     <Link to={`/course/${c._id}`} className="btn btn-primary btn-sm">Open Course</Link>
                     <Link to={`/assessment/course/${c._id}/missions`} className="btn btn-secondary btn-sm">Assessments</Link>

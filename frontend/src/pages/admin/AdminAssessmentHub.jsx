@@ -26,8 +26,8 @@ export default function AdminAssessmentHub() {
   }
 
   return (
-    <div className="assessment-hub-page">
-      <div className="section-header assessment-hub-page__hero" style={{ marginBottom: 28 }}>
+    <div>
+      <div className="section-header" style={{ marginBottom: 28 }}>
         <div>
           <h1 className="section-title">Assessment & Evaluation Engine</h1>
           <p className="section-sub">Manage missions and quizzes for every course from one place.</p>
