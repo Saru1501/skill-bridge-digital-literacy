@@ -98,6 +98,19 @@ const listNgoApplications = async (req, res) => {
   }
 };
 
+// Student: list their own applications
+const listStudentApplications = async (req, res) => {
+  try {
+    const applications = await SponsorshipApplication.find({ studentUser: req.user._id })
+      .populate("program", "title description")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({ applications });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || "Server error" });
+  }
+};
+
 // NGO: approve/reject
 const reviewApplication = async (req, res) => {
   try {
@@ -228,6 +241,7 @@ module.exports = {
   createProgram,
   listPrograms,
   applyForSponsorship,
+  listStudentApplications,
   deleteProgram,
   deleteApplication,
   listNgoApplications,

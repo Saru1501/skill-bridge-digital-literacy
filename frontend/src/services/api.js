@@ -17,4 +17,17 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Response interceptor to handle global errors (e.g., 401 Unauthorized)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Clear local storage and redirect to login if session expires
+      localStorage.removeItem("skillbridge_auth");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

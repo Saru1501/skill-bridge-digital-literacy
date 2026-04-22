@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "test": "jest --testTimeout=30000 --forceExit"
+    "test": "jest --testTimeout=30000 --forceExit",
+    "test:perf": "npx artillery run tests/performance.yml"
   },
   "keywords": [],
   "author": "",

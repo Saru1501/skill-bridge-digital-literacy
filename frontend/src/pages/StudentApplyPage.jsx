@@ -7,7 +7,7 @@ export default function StudentApplyPage() {
   const navigate = useNavigate();
 
   const selectedProgram = location.state?.selectedProgram || null;
-
+           // useState: Keeps track of form data and loading spinnerstate, error/success messages, and application history
   const [formData, setFormData] = useState({
     programId: selectedProgram?._id || "",
     reason: "",

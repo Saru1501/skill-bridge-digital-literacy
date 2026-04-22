@@ -7,19 +7,15 @@ const protect = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authorized, token missing",
-      });
+      res.status(401);
+      throw new Error("Not authorized, token missing");
     }
 
     const token = authHeader.split(" ")[1];
 
     if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
-        success: false,
-        message: "JWT_SECRET is not configured",
-      });
+      res.status(500);
+      throw new Error("JWT_SECRET is not configured");
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -27,19 +23,18 @@ const protect = async (req, res, next) => {
     const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authorized, user not found",
-      });
+      res.status(401);
+      throw new Error("Not authorized, user not found");
     }
 
     req.user = user;
     next();
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: "Not authorized, token invalid or expired",
-    });
+    if (res.statusCode === 200) res.status(401);
+    const errMessage = error.name === "JsonWebTokenError" || error.name === "TokenExpiredError" 
+      ? "Not authorized, token invalid or expired" 
+      : error.message;
+    next(new Error(errMessage));
   }
 };
 
@@ -47,17 +42,13 @@ const protect = async (req, res, next) => {
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !req.user.role) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authorized, user role missing",
-      });
+      res.status(401);
+      return next(new Error("Not authorized, user role missing"));
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: `Forbidden: ${req.user.role} role does not have access`,
-      });
+      res.status(403);
+      return next(new Error(`Forbidden: ${req.user.role} role does not have access`));
     }
 
     next();
@@ -69,10 +60,8 @@ const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();
   } else {
-    res.status(403).json({
-      success: false,
-      message: "Access denied. Admins only.",
-    });
+    res.status(403);
+    return next(new Error("Access denied. Admins only."));
   }
 };
 

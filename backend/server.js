@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./src/config/db");
+const errorHandler = require("./src/middleware/errorHandler");
 
 dotenv.config();
 
@@ -46,9 +47,14 @@ app.use("/api/tickets", require("./src/routes/ticketRoutes"));
 app.use("/api/payments", require("./src/routes/paymentRoutes"));
 
 // 404 handler
-app.use((req, res) => {
-  res.status(404).json({ success: false, message: `Route ${req.method} ${req.originalUrl} not found` });
+app.use((req, res, next) => {
+  const error = new Error(`Route ${req.method} ${req.originalUrl} not found`);
+  res.status(404);
+  next(error);
 });
+
+// Use error handler middleware
+app.use(errorHandler);
 
 // DB connection - returns promise so tests can await it
 const dbReady = connectDB();

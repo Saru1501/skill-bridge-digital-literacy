@@ -1,9 +1,11 @@
 import { createContext, useEffect, useMemo, useState } from "react";
 import { getMe, loginUser, registerUser } from "../services/authService";
+import { useToast } from "./ToastContext";
 
-export const AuthContext = createContext(null);
+export const AuthContext = createContext(null);   // Create a React Context for authentication data and functions
 
 export function AuthProvider({ children }) {
+  const { addToast } = useToast();
   const [auth, setAuth] = useState(() => {
     const stored = localStorage.getItem("skillbridge_auth");
     return stored ? JSON.parse(stored) : { user: null, token: null };
@@ -31,18 +33,19 @@ export function AuthProvider({ children }) {
 
       setAuth(newAuth);
       localStorage.setItem("skillbridge_auth", JSON.stringify(newAuth));
+      
+      addToast("Login successful!", "success");
 
       return {
         success: true,
         user: res.user,
       };
     } catch (error) {
+      const msg = error.response?.data?.message || error.message || "Login failed";
+      addToast(msg, "error");
       return {
         success: false,
-        message:
-          error.response?.data?.message ||
-          error.message ||
-          "Login failed",
+        message: msg,
       };
     } finally {
       setLoading(false);
@@ -62,17 +65,18 @@ export function AuthProvider({ children }) {
       setAuth(newAuth);
       localStorage.setItem("skillbridge_auth", JSON.stringify(newAuth));
 
+      addToast("Registration successful!", "success");
+
       return {
         success: true,
         user: res.user,
       };
     } catch (error) {
+      const msg = error.response?.data?.message || error.message || "Registration failed";
+      addToast(msg, "error");
       return {
         success: false,
-        message:
-          error.response?.data?.message ||
-          error.message ||
-          "Registration failed",
+        message: msg,
       };
     } finally {
       setLoading(false);
@@ -82,6 +86,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setAuth({ user: null, token: null });
     localStorage.removeItem("skillbridge_auth");
+    addToast("Logged out successfully", "info");
   };
 
   const refreshUser = async () => {

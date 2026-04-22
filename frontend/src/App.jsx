@@ -6,6 +6,7 @@ import StudentDashboard from "./pages/StudentDashboard";
 import NgoDashboard from "./pages/NgoDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentProgramsPage from "./pages/StudentProgramsPage";
+import StudentApplicationsPage from "./pages/StudentApplicationsPage";
 import StudentApplyPage from "./pages/StudentApplyPage";
 import StudentRedeemPage from "./pages/StudentRedeemPage";
 import StudentTicketsPage from "./pages/StudentTicketsPage";
@@ -39,6 +40,7 @@ function App() {
       >
         <Route index element={<StudentDashboard />} />
         <Route path="programs" element={<StudentProgramsPage />} />
+        <Route path="applications" element={<StudentApplicationsPage />} />
         <Route path="apply" element={<StudentApplyPage />} />
         <Route path="redeem" element={<StudentRedeemPage />} />
         <Route path="tickets" element={<StudentTicketsPage />} />

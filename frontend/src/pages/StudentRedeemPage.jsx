@@ -90,22 +90,39 @@ export default function StudentRedeemPage() {
       </div>
 
       {redeemedData && (
-        <div className="rounded-2xl bg-white p-6 shadow-sm text-left border border-gray-100">
-          <h3 className="text-xl font-semibold text-gray-900">Redeemed Sponsorship Details</h3>
+        <div className="rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 p-8 shadow-lg text-left text-white animate-fade-in relative overflow-hidden">
+          {/* Decorative background element */}
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
 
-          <div className="mt-4 space-y-2 text-sm text-gray-600">
-            <p>
-              <span className="font-medium text-gray-800">Status:</span>{" "}
-              {redeemedData.valid ? "Valid" : "Invalid"}
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-white/20 p-2 rounded-full">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold">Code Validated Successfully!</h3>
+            </div>
+
+            <p className="text-indigo-100 text-lg mb-6 max-w-lg">
+              Congratulations! Your sponsorship code has been accepted. You are now officially enrolled and eligible for financial support under the following program:
             </p>
-            <p>
-              <span className="font-medium text-gray-800">Program:</span>{" "}
-              {redeemedData.program?.title || "N/A"}
-            </p>
-            <p>
-              <span className="font-medium text-gray-800">Sponsorship Code:</span>{" "}
-              {redeemedData.sponsorshipCode || "N/A"}
-            </p>
+
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-5 mb-6">
+              <p className="text-sm text-indigo-200 uppercase tracking-wider font-semibold mb-1">Sponsored Program</p>
+              <p className="text-xl font-bold">{redeemedData.program?.title || "Unknown Program"}</p>
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-sm font-medium text-indigo-100 opacity-80">Code Reference:</span>
+                <code className="bg-black/30 px-2 py-1 rounded text-sm font-mono">{redeemedData.sponsorshipCode}</code>
+              </div>
+            </div>
+
+            <button 
+              className="bg-white text-indigo-600 px-6 py-3 rounded-lg font-bold shadow-md hover:bg-gray-50 transition-all active:scale-95"
+              onClick={() => window.location.href = '/student/payment'}
+            >
+              Continue to Payment / Enrollment
+            </button>
           </div>
         </div>
       )}

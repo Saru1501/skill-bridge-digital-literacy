@@ -1,0 +1,22 @@
+config:
+  target: "http://localhost:5001"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: "Warm up the API"
+    - duration: 60
+      arrivalRate: 20
+      name: "Sustained load"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      
+scenarios:
+  - name: "Health check and public routes"
+    flow:
+      - get:
+          url: "/"
+  - name: "Simulate non-authenticated user load on public endpoints"
+    flow:
+      - get:
+          url: "/api/courses"

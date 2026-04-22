@@ -4,6 +4,7 @@ const {
   createProgram,
   listPrograms,
   applyForSponsorship,
+  listStudentApplications,
   listNgoApplications,
   reviewApplication,
   redeemSponsorshipCode,
@@ -19,6 +20,7 @@ router.get("/programs", protect, listPrograms);
 
 // Applications
 router.post("/applications", protect, authorize("student"), applyForSponsorship);
+router.get("/my-applications", protect, authorize("student"), listStudentApplications);
 router.get("/applications", protect, authorize("ngo"), listNgoApplications);
 router.put(
   "/applications/:id/status",

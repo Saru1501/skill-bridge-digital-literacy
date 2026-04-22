@@ -113,7 +113,27 @@ npm run dev
 # Frontend runs at http://localhost:5173
 ```
 
+## Testing
+
+### Unit & Integration Testing
+```bash
+cd backend
+npm test
+```
+
+### Performance Testing
+This project includes pre-configured Artillery.io scripts to evaluate the API under sustained loads.
+```bash
+cd backend
+npm run test:perf
+```
+
 ## API Endpoints
+
+> [!IMPORTANT]
+> Complete API Endpoint Documentation is available as a Postman Collection. 
+> You can find it in the `docs/SkillBridge_API_Postman.json` file. 
+> Import this file directly into Postman to view detailed schemas, authentication headers, and example requests for all modules.
 
 ### Authentication
 | Method | Endpoint | Description |
