@@ -18,7 +18,7 @@ export default function MissionsPage() {
     setError('');
     try {
       const { data } = await getMissionsByCourse(courseId);
-      const list = data.data;
+      const list = Array.isArray(data?.data) ? data.data : [];
       setMissions(list);
 
       // fetch each student's own submission in parallel
@@ -42,7 +42,12 @@ export default function MissionsPage() {
   useEffect(() => { load(); }, [load]);
 
   const handleSubmissionSuccess = (newSub) => {
-    setSubmissions((prev) => ({ ...prev, [newSub.mission]: newSub }));
+    const missionId =
+      typeof newSub?.mission === 'object' ? newSub.mission?._id : newSub?.mission;
+
+    if (!missionId) return;
+
+    setSubmissions((prev) => ({ ...prev, [missionId]: newSub }));
     setSelected((prev) => prev ? { ...prev, submission: newSub } : prev);
   };
 

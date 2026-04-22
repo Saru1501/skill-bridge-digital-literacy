@@ -22,9 +22,12 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    const result = await login(formData);
-    if (!result.success) { setError(result.message); return; }
-    navigate(getDashboardPath(result.user?.role), { replace: true });
+    try {
+      const user = await login(formData.email, formData.password);
+      navigate(getDashboardPath(user?.role), { replace: true });
+    } catch (err) {
+      setError(err?.response?.data?.message || "Login failed. Please try again.");
+    }
   };
 
   return (

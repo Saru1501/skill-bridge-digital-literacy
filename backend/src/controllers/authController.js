@@ -114,7 +114,7 @@ const registerUser = async (req, res) => {
       data: sanitizeUser(user),
     });
   } catch (error) {
-    console.error("registerUser failed:", error);
+    console.error("loginUser failed:", error);
     const { status, message } = formatAuthError(error);
     return res.status(status).json({ message });
   }

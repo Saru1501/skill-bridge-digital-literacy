@@ -22,11 +22,25 @@ export default function Login() {
   const submit = async (e) => {
     e.preventDefault(); setError(""); setLoading(true);
     try {
+      const formData = new FormData(e.currentTarget);
+      const submitted = {
+        name: String(formData.get("name") || form.name || "").trim(),
+        email: String(formData.get("email") || form.email || "").trim(),
+        password: String(formData.get("password") || form.password || ""),
+        role: String(formData.get("role") || form.role || "student"),
+      };
+
       let user;
-      if (mode === "login") { user = await login(form.email, form.password); }
+      if (!submitted.email || !submitted.password) {
+        setError("Email and password are required");
+        setLoading(false);
+        return;
+      }
+
+      if (mode === "login") { user = await login(submitted.email, submitted.password); }
       else {
-        if (!form.name.trim()) { setError("Full name is required"); setLoading(false); return; }
-        user = await register(form.name, form.email, form.password, form.role);
+        if (!submitted.name) { setError("Full name is required"); setLoading(false); return; }
+        user = await register(submitted.name, submitted.email, submitted.password, submitted.role);
       }
       const role = user.role?.toLowerCase();
       navigate(role === "admin" || role === "university" ? "/admin" : "/dashboard");
