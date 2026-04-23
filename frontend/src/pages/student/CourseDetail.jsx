@@ -105,6 +105,9 @@ export default function CourseDetail() {
                   <button className="btn btn-primary" style={{width:"100%",justifyContent:"center"}} onClick={() => lessons[0] && navigate(`/lesson/${lessons[0]._id}`)}>
                     {pct > 0 ? "Continue Learning" : "Start Course"}
                   </button>
+                  <Link to={`/assessment/course/${course._id}/missions`} className="btn btn-secondary" style={{width:"100%",justifyContent:"center",marginTop:10}}>
+                    Open Assessments
+                  </Link>
                 </>
               ) : (
                 <>

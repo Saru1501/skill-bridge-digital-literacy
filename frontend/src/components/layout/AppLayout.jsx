@@ -6,16 +6,23 @@ const pageTitles = {
   "/dashboard": "Dashboard",
   "/browse": "Browse Courses",
   "/my-courses": "My Courses",
+  "/assessment": "Assessment & Evaluation Engine",
   "/saved": "Saved Courses",
   "/downloads": "Downloads",
   "/admin": "Admin Dashboard",
   "/admin/courses": "Manage Courses",
+  "/admin/assessment": "Assessment & Evaluation Engine",
 };
 
 export default function AppLayout() {
   const { user } = useAuth();
   const { pathname } = useLocation();
-  const title = pageTitles[pathname] || "SkillBridge";
+  let title = pageTitles[pathname] || "SkillBridge";
+
+  if (pathname.startsWith("/assessment/course/")) title = "Assessment Workspace";
+  if (pathname.startsWith("/admin/assessment/course/")) title = "Assessment Management";
+  if (pathname.startsWith("/course/")) title = "Course Details";
+  if (pathname.startsWith("/lesson/")) title = "Lesson View";
 
   return (
     <div className="layout">

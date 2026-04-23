@@ -10,20 +10,21 @@ router.get("/me", protect, getMe);
 router.get(
   "/admin",
   protect,
-  authorize("admin"),  // fixed: lowercase
-  (req, res) => res.status(200).json({ success: true, message: "Admin access granted", user: req.user })
+  authorize("Admin"),
+  (req, res) => res.status(200).json({ message: "Admin access granted", user: req.user })
 );
 router.get(
   "/organization",
   protect,
-  authorize("university", "ngo"),  // fixed: lowercase
-  (req, res) => res.status(200).json({ success: true, message: "Organization access granted", user: req.user })
+  authorize("University", "NGO"),
+  (req, res) =>
+    res.status(200).json({ message: "Organization access granted", user: req.user })
 );
 router.get(
   "/mentors",
   protect,
-  authorize("mentor", "admin"),  // fixed: lowercase
-  (req, res) => res.status(200).json({ success: true, message: "Mentor/Admin access granted", user: req.user })
+  authorize("Mentor", "Admin"),
+  (req, res) => res.status(200).json({ message: "Mentor/Admin access granted", user: req.user })
 );
 
 module.exports = router;

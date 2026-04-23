@@ -209,6 +209,56 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; back
 .topbar-badge { background: var(--primary-light); color: var(--primary); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: capitalize; }
 .page-wrap { padding: 28px; flex: 1; }
 
+/* Assessment hub integration */
+.assessment-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.assessment-hub-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.assessment-hub-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.assessment-hub-card__top h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.assessment-hub-card__top p {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.assessment-hub-card__meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.assessment-hub-card__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
 /* â”€â”€ Lesson view â”€â”€ */
 .lesson-layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; }
 .lesson-sidebar-panel { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden; height: fit-content; box-shadow: var(--shadow); }

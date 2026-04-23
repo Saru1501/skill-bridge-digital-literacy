@@ -58,7 +58,7 @@ app.use((req, res) => {
 // DB connection
 const dbReady = connectDB();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 
 if (require.main === module) {
   dbReady.then(() => {

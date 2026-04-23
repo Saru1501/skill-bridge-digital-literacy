@@ -9,4 +9,5 @@ yarn-error.log*
 coverage/
 dist/
 build/
- 
+
+node_modules

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "test": "jest --testTimeout=30000 --forceExit"
+    "test": "cross-env NODE_ENV=test jest --runInBand"
   },
   "keywords": [],
   "author": "",
@@ -19,22 +19,18 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-validator": "^7.3.1",
+    "googleapis": "^171.4.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.2.1",
+    "mongoose": "^9.2.3",
     "multer": "^2.0.2",
-    "stripe": "^20.4.0",
+    "stripe": "^20.4.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "jest": "^29.0.0",
+    "cross-env": "^10.1.0",
+    "jest": "^30.2.0",
     "mongodb-memory-server": "^11.0.1",
     "nodemon": "^3.1.14",
-    "supertest": "^7.0.0"
-  },
-  "jest": {
-    "setupFiles": [
-      "./tests/setup.js"
-    ],
-    "testEnvironment": "node"
+    "supertest": "^7.2.2"
   }
 }

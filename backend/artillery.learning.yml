@@ -1,0 +1,48 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 60
+      arrivalRate: 2
+      rampTo: 10
+      name: "Warm-up & Ramp-up"
+    - duration: 120
+      arrivalRate: 10
+      name: "Sustained Peak Load"
+  processor: "./artillery-setup.js"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Student Course Engagement Flow"
+    beforeScenario: "beforeScenario"
+    flow:
+      - get:
+          url: "/api/courses"
+          name: "Browse Catalogue"
+      - post:
+          url: "/api/enrollments/{{ courseId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          name: "Enrollment"
+          ifTrue: "courseId" # Only if courseId was found in setup
+      - get:
+          url: "/api/lessons/{{ lessonId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          name: "View Lesson Content"
+          ifTrue: "lessonId"
+      - patch:
+          url: "/api/progress/{{ courseId }}/lessons/{{ lessonId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          name: "Progress Sync (Offline Burst Simulation)"
+          ifTrue: "lessonId"
+      - post:
+          url: "/api/progress/{{ courseId }}/sync"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            completedLessons: ["{{ lessonId }}"]
+          name: "Offline Batch Sync"
+          ifTrue: "lessonId"

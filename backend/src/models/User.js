@@ -2,6 +2,12 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
+    role: {
+      type: String,
+      enum: ["Student", "University", "NGO", "Mentor", "Admin"],
+      default: "Student",
+      required: [true, "Role is required"],
+    },
     name: {
       type: String,
       required: [true, "Name is required"],
@@ -19,12 +25,6 @@ const userSchema = new mongoose.Schema(
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
       select: false,
-    },
-    role: {
-      type: String,
-      enum: ["student", "admin", "university", "ngo", "mentor"],
-      default: "student",
-      required: [true, "Role is required"],
     },
   },
   {
