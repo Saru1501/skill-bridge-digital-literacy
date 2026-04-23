@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "test": "cross-env NODE_ENV=test jest --runInBand"
+    "test": "cross-env NODE_ENV=test jest --runInBand",
+    "test:unit": "cross-env NODE_ENV=test jest src/__tests__/.*\\.service\\.test\\.js",
+    "test:integration": "cross-env NODE_ENV=test jest src/__tests__/.*\\.integration\\.test\\.js --runInBand"
   },
   "keywords": [],
   "author": "",
