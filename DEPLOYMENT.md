@@ -19,8 +19,15 @@ CLOUDINARY_CLOUD_NAME=...
 CLOUDINARY_API_KEY=...
 CLOUDINARY_API_SECRET=...
 STRIPE_SECRET_KEY=...
-CORS_ORIGIN=http://localhost:3000,https://your-vercel-project.vercel.app
+CORS_ORIGIN=http://localhost:3000
+ALLOW_VERCEL_PREVIEW_ORIGINS=true
 ```
+
+Notes:
+
+- `CORS_ORIGIN` is now only needed for local dev or any fixed custom frontend domains you want to allow explicitly.
+- With `ALLOW_VERCEL_PREVIEW_ORIGINS=true`, Railway will accept Vercel deployment URLs such as preview redeploy URLs, so you do not need to update Railway every time Vercel creates a new URL.
+- If you want stricter production-only access, set `CORS_ORIGIN=http://localhost:3000,https://your-stable-production-domain.vercel.app` and change `ALLOW_VERCEL_PREVIEW_ORIGINS=false`.
 
 After deployment, confirm the API is reachable:
 
@@ -64,3 +71,4 @@ Test these flows from the Vercel URL:
 - Load courses
 
 If login fails in the browser with a CORS error, update Railway `CORS_ORIGIN` to include the exact Vercel URL and redeploy the backend.
+If you keep `ALLOW_VERCEL_PREVIEW_ORIGINS=true`, you should not need to change Railway for each new Vercel redeploy URL. Only update `CORS_ORIGIN` when you want to add a fixed custom frontend domain.

@@ -2,29 +2,16 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const connectDB = require("./src/config/db");
+const { buildCorsOptions, createOriginMatcher } = require("./src/config/cors");
 
 dotenv.config();
 
 const app = express();
-const allowedOrigins = (process.env.CORS_ORIGIN || process.env.FRONTEND_URL || "http://localhost:3000")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-const allowAllOrigins = allowedOrigins.includes("*");
+const originMatcher = createOriginMatcher();
 
-// Allow local development plus deployed frontends configured via env vars.
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin || allowAllOrigins || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(null, false);
-  },
-  credentials: true,
-  allowedHeaders: ['Authorization', 'Content-Type'],
-  exposedHeaders: ['Authorization', 'Content-Type'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-}));
+// Support local development, explicitly configured origins, and Vercel deploy URLs.
+app.locals.cors = originMatcher;
+app.use(cors(buildCorsOptions(originMatcher)));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
