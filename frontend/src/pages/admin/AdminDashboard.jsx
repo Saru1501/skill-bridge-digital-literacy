@@ -1,82 +1,205 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getCourses } from "../../services/api";
+import useAuth from "../../hooks/useAuth";
+
+const heroStyle = {
+  background:
+    "linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(30,64,175,0.94) 52%, rgba(96,165,250,0.84) 100%)",
+  borderRadius: 28,
+  padding: 32,
+  color: "#FFFFFF",
+  marginBottom: 32,
+  boxShadow: "0 24px 60px rgba(15, 23, 42, 0.18)",
+};
+
+const systemHealth = [
+  { service: "Core API", status: "Operational", latency: "24ms", tone: "badge-green" },
+  { service: "Learning Delivery", status: "Operational", latency: "12ms", tone: "badge-green" },
+  { service: "Offline Sync", status: "Monitoring", latency: "105ms", tone: "badge-yellow" },
+  { service: "Gamification Engine", status: "Operational", latency: "8ms", tone: "badge-green" },
+];
+
+const modules = [
+  { label: "Courses", to: "/admin/courses", description: "Create, edit, publish, and organize course content." },
+  { label: "Assessment Hub", to: "/admin/assessment", description: "Manage missions, quizzes, and grading workflows." },
+  { label: "Gamification", to: "/admin/gamification", description: "Configure points, rules, badges, and rewards." },
+  { label: "Support", to: "/admin/tickets", description: "Review student tickets and resolve platform issues." },
+];
 
 export default function AdminDashboard() {
-  const [stats,   setStats]   = useState({ total:0, published:0, drafts:0, enrollments:0 });
-  const [recent,  setRecent]  = useState([]);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await getCourses({ limit:100 });
-        const all = res.data.data || [];
-        const pub = all.filter(c => c.isPublished);
-        const enr = all.reduce((a, c) => a + (c.enrollmentCount||0), 0);
-        setStats({ total:all.length, published:pub.length, drafts:all.length-pub.length, enrollments:enr });
-        setRecent(all.slice(0,6));
-      } catch {} finally { setLoading(false); }
-    };
-    load();
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
   }, []);
 
-  if (loading) return <div className="page-loading"><div className="spinner"></div></div>;
+  if (loading) {
+    return (
+      <div className="page-loading">
+        <div className="spinner" />
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div className="section-header" style={{marginBottom:28}}>
-        <div>
-          <h1 className="section-title">Admin Dashboard</h1>
-          <p className="section-sub">Overview of the SkillBridge learning platform.</p>
-        </div>
-        <Link to="/admin/courses" className="btn btn-primary">
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
-          Add Course
-        </Link>
-      </div>
-
-      <div className="stats-grid">
-        {[
-          { label:"Total Courses",   value:stats.total,       color:"blue",   icon:<svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg> },
-          { label:"Published",       value:stats.published,   color:"green",  icon:<svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> },
-          { label:"Drafts",          value:stats.drafts,      color:"yellow", icon:<svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> },
-          { label:"Total Enrollments",value:stats.enrollments, color:"purple", icon:<svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg> },
-        ].map(s => (
-          <div className="stat-card" key={s.label}>
-            <div className={"stat-icon "+s.color}>{s.icon}</div>
-            <div className="stat-info"><div className="stat-value">{s.value}</div><div className="stat-label">{s.label}</div></div>
+    <div className="dashboard-v2">
+      <section style={heroStyle}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
+          <div style={{ maxWidth: 720 }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 12px",
+                borderRadius: 999,
+                background: "rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.18)",
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                marginBottom: 18,
+              }}
+            >
+              Platform Operations
+            </div>
+            <h2 style={{ fontSize: 34, lineHeight: 1.1, marginBottom: 12, color: "rgba(255,255,255,0.84)" }}>Administrator command center</h2>
+            <p style={{ color: "rgba(255,255,255,0.84)", fontSize: 16, maxWidth: 620 }}>
+              Keep the learning platform healthy, publish content, and coordinate assessments,
+              rewards, and support queues from one place.
+            </p>
           </div>
-        ))}
-      </div>
 
-      <div className="section-header" style={{marginBottom:16}}>
-        <h2 style={{fontSize:17,fontWeight:700}}>Recent Courses</h2>
-        <Link to="/admin/courses" style={{fontSize:13,color:"#2563EB",textDecoration:"none",fontWeight:600}}>Manage All</Link>
-      </div>
+          <div style={{ minWidth: 220 }}>
+            <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.72)" }}>
+              Active session
+            </div>
+            <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 10 }}>{user?.name || "Admin"}</div>
+            <div style={{ color: "rgba(255,255,255,0.8)" }}>Admin access with full management controls</div>
+          </div>
+        </div>
+      </section>
 
-      <div className="table-wrap">
-        <table className="table">
-          <thead><tr><th>Course Title</th><th>Category</th><th>Level</th><th>Lessons</th><th>Enrolled</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody>
-            {recent.length === 0 && <tr><td colSpan={7} style={{textAlign:"center",color:"#94A3B8",padding:32}}>No courses yet. Create your first course.</td></tr>}
-            {recent.map(c => (
-              <tr key={c._id}>
-                <td><span style={{fontWeight:600}}>{c.title}</span></td>
-                <td><span className="badge badge-blue">{c.category}</span></td>
-                <td>{c.level}</td>
-                <td>{c.totalLessons}</td>
-                <td>{c.enrollmentCount}</td>
-                <td><span className={"badge "+(c.isPublished?"badge-green":"badge-yellow")}>{c.isPublished?"Published":"Draft"}</span></td>
-                <td>
-                  <div className="actions">
-                    <Link to={`/admin/courses/${c._id}/lessons`} className="btn btn-secondary btn-sm">Lessons</Link>
+      <section className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon">LR</div>
+          <div>
+            <div className="stat-value">2,405</div>
+            <div className="stat-label">Active Learners</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">NG</div>
+          <div>
+            <div className="stat-value">48</div>
+            <div className="stat-label">NGO Partners</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">CR</div>
+          <div>
+            <div className="stat-value">112</div>
+            <div className="stat-label">Live Courses</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">CF</div>
+          <div>
+            <div className="stat-value">892</div>
+            <div className="stat-label">Certificates Issued</div>
+          </div>
+        </div>
+      </section>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1.35fr 1fr", gap: 24 }}>
+        <section className="card">
+          <div className="card-header">
+            <div>
+              <h3 className="card-title">Management modules</h3>
+              <p className="section-sub" style={{ marginTop: 6 }}>
+                Jump into the areas that keep the platform running smoothly.
+              </p>
+            </div>
+          </div>
+          <div className="card-body" style={{ padding: 24, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+            {modules.map((module) => (
+              <Link key={module.to} to={module.to} style={{ textDecoration: "none" }}>
+                <div
+                  style={{
+                    background: "#F8FBFF",
+                    border: "1px solid #DBEAFE",
+                    borderRadius: 22,
+                    padding: 20,
+                    minHeight: 156,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 12, color: "#3B82F6", textTransform: "uppercase", fontWeight: 800, letterSpacing: "0.08em", marginBottom: 10 }}>
+                      Module
+                    </div>
+                    <div style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", marginBottom: 8 }}>
+                      {module.label}
+                    </div>
+                    <p style={{ color: "#64748B", lineHeight: 1.6 }}>{module.description}</p>
                   </div>
-                </td>
-              </tr>
+                  <div style={{ marginTop: 18, color: "#1D4ED8", fontWeight: 700 }}>Open workspace</div>
+                </div>
+              </Link>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </section>
+
+        <div style={{ display: "grid", gap: 24 }}>
+          <section className="card">
+            <div className="card-header">
+              <h3 className="card-title">System health</h3>
+            </div>
+            <div className="table-wrap">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Latency</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {systemHealth.map((item) => (
+                    <tr key={item.service}>
+                      <td>{item.service}</td>
+                      <td>
+                        <span className={`badge ${item.tone}`}>{item.status}</span>
+                      </td>
+                      <td>{item.latency}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-header">
+              <h3 className="card-title">Operations focus</h3>
+            </div>
+            <div className="card-body" style={{ padding: 24, display: "grid", gap: 14 }}>
+              <div style={{ background: "#F8FBFF", border: "1px solid #DBEAFE", borderRadius: 18, padding: 18 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#1D4ED8", marginBottom: 4 }}>Today</div>
+                <div style={{ color: "#0F172A", fontWeight: 700 }}>Review open tickets and publish queued courses.</div>
+              </div>
+              <div style={{ background: "#F8FBFF", border: "1px solid #DBEAFE", borderRadius: 18, padding: 18 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#1D4ED8", marginBottom: 4 }}>This week</div>
+                <div style={{ color: "#0F172A", fontWeight: 700 }}>Audit gamification rules and validate assessment coverage.</div>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );

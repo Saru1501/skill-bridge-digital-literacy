@@ -62,7 +62,16 @@ export const syncOffline        = (courseId, completedLessons) =>
   api.post(`/progress/${courseId}/sync`, { completedLessons });
 
 // ── SAVED COURSES (Component 1) ─────────────────────────────────────────────
+
+// Saved Courses
 export const toggleSave = (courseId) => api.post(`/saved/${courseId}`);
 export const getMySaved = ()         => api.get("/saved");
+
+// Saved Resources
+export const toggleSaveResource = (lessonId, resourceId) => api.post(`/saved-resources/${lessonId}/resources/${resourceId}`);
+export const getMySavedResources = () => api.get("/saved-resources/my");
+
+// Resource Download
+export const downloadResource = (lessonId, resourceId) => api.get(`/lessons/${lessonId}/resources/${resourceId}/download`, { responseType: 'blob' });
 
 export default api;

@@ -1,3 +1,4 @@
+//NGO.js
 const mongoose = require("mongoose");
 
 const ngoSchema = new mongoose.Schema(

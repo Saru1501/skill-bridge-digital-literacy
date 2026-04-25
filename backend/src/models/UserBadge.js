@@ -1,3 +1,4 @@
+//UserBadge.js
 const mongoose = require("mongoose");
  
 const userBadgeSchema = new mongoose.Schema(

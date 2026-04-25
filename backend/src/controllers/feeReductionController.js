@@ -7,7 +7,8 @@ const checkFeeReduction = async (studentId) => {
     if (!userPoints) return;
  
     const discountTiers = [
-      { points: 500, discount: 30 },
+      { points: 1000, discount: 50 },
+      { points: 600, discount: 30 },
       { points: 300, discount: 20 },
       { points: 100, discount: 10 },
     ];

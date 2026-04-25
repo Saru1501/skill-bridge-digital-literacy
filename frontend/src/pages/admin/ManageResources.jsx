@@ -49,10 +49,12 @@ export default function ManageResources() {
     // Auto-detect type
     if (f) {
       const ext = f.name.split(".").pop()?.toLowerCase();
-      if (["pdf"].includes(ext))                       setForm(fm=>({...fm,type:"pdf"}));
-      else if (["mp4","webm","avi","mov"].includes(ext)) setForm(fm=>({...fm,type:"video"}));
-      else if (["ppt","pptx","key"].includes(ext))     setForm(fm=>({...fm,type:"slides"}));
-      if (!form.name) setForm(fm=>({...fm,name:f.name.replace(/\.[^/.]+$/,"")}));
+      if (["pdf"].includes(ext)) setForm(fm => ({ ...fm, type: "pdf" }));
+      else if (["mp4", "webm", "avi", "mov"].includes(ext)) setForm(fm => ({ ...fm, type: "video" }));
+      else if (["ppt", "pptx", "key"].includes(ext)) setForm(fm => ({ ...fm, type: "slides" }));
+      else if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) setForm(fm => ({ ...fm, type: "image" }));
+      else setForm(fm => ({ ...fm, type: "other" }));
+      if (!form.name) setForm(fm => ({ ...fm, name: f.name.replace(/\.[^/.]+$/, "") }));
     }
   };
 
@@ -90,8 +92,13 @@ export default function ManageResources() {
   if (loading) return <div className="page-loading"><div className="spinner"></div></div>;
 
   return (
-    <div>
+    <div style={{ background: '#fff', minHeight: '100vh', padding: 32 }}>
+      <div style={{ background: '#1E293B', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>Manage Resources</h1>
+      </div>
+
       {/* Preview modal */}
+
       {preview && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",zIndex:2000,display:"flex",flexDirection:"column"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 20px",background:"#0F172A"}}>
@@ -99,18 +106,35 @@ export default function ManageResources() {
             <button onClick={()=>setPreview(null)} style={{background:"rgba(255,255,255,0.1)",border:"none",color:"#fff",padding:"6px 12px",borderRadius:6,cursor:"pointer",fontWeight:600}}>Close</button>
           </div>
           <div style={{flex:1,overflow:"hidden",padding:16,display:"flex",alignItems:"center",justifyContent:"center"}}>
-            {preview.type==="pdf" ? (
-              <iframe src={preview.url} style={{width:"100%",height:"100%",border:"none",borderRadius:8}} title={preview.name}/>
-            ) : preview.type==="video" ? (
-              <video controls autoPlay style={{maxWidth:"100%",maxHeight:"100%",borderRadius:8}}>
+            {/* PDF Preview (Cloudinary fl_inline only for PDFs) */}
+            {preview.type === "pdf" ? (
+              <iframe
+                src={
+                  preview.url && preview.url.includes("cloudinary")
+                    ? preview.url.replace("/upload/", "/upload/fl_inline/")
+                    : `${process.env.REACT_APP_API_URL || "http://localhost:3001/api"}/lessons/${lessonId}/resources/${preview._id}/download`
+                }
+                style={{width:"100%",height:"100%",border:"none",borderRadius:8,background:"#fff"}}
+                title={preview.name}
+              />
+            ) :
+            // Video Preview
+            (preview.type === "video" ? (
+              <video controls autoPlay style={{maxWidth:"100%",maxHeight:"100%",borderRadius:8,background:"#000"}}>
                 <source src={preview.url}/> Your browser does not support video.
               </video>
-            ) : (
+            ) :
+            // Image Preview (no fl_inline)
+            (preview.type === "image" && preview.url ? (
+              <img src={preview.url} alt={preview.name} style={{maxWidth:"100%",maxHeight:"80vh",borderRadius:8,background:"#fff",boxShadow:"0 8px 32px rgba(0,0,0,0.2)"}} />
+            ) :
+            // Fallback for other types
+            (
               <div style={{textAlign:"center",color:"#fff"}}>
                 <p style={{marginBottom:16,color:"#94A3B8"}}>No preview for this file type.</p>
                 <a href={preview.url} target="_blank" rel="noreferrer" style={{padding:"10px 20px",background:"#2563EB",color:"#fff",borderRadius:8,textDecoration:"none"}}>Open File</a>
               </div>
-            )}
+            )))}
           </div>
         </div>
       )}

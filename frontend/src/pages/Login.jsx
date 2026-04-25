@@ -43,7 +43,13 @@ export default function Login() {
         user = await register(submitted.name, submitted.email, submitted.password, submitted.role);
       }
       const role = user.role?.toLowerCase();
-      navigate(role === "admin" || role === "university" ? "/admin" : "/dashboard");
+      navigate(
+        role === "admin" || role === "university"
+          ? "/admin"
+          : role === "ngo"
+            ? "/ngo"
+            : "/dashboard"
+      );
     } catch (err) {
       setError(err?.response?.data?.message || "Connection failed. Ensure backend is running on port 3001.");
     } finally { setLoading(false); }

@@ -2,150 +2,180 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { applyForSponsorship } from "../services/sponsorshipService";
 
+const sectionStyle = {
+  background: "#FFFFFF",
+  border: "1px solid #E2E8F0",
+  borderRadius: 24,
+  padding: 24,
+  boxShadow: "0 18px 40px rgba(15, 23, 42, 0.06)",
+};
+
 export default function StudentApplyPage() {
   const location = useLocation();
   const navigate = useNavigate();
-
   const selectedProgram = location.state?.selectedProgram || null;
 
   const [formData, setFormData] = useState({
     programId: selectedProgram?._id || "",
     reason: "",
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
+  const handleChange = (event) => {
+    setFormData((current) => ({
+      ...current,
+      [event.target.name]: event.target.value,
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
     setSuccess("");
 
     if (!formData.programId) {
-      setError("Please select a sponsorship program from the programs page.");
+      setError("Please choose a sponsorship program before submitting an application.");
       return;
     }
 
     try {
       setLoading(true);
-      const data = await applyForSponsorship(formData);
-      setSuccess(data.message || "Application submitted successfully.");
-      setFormData((prev) => ({
-        ...prev,
-        reason: "",
-      }));
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to submit application.");
+      const response = await applyForSponsorship(formData);
+      setSuccess(response.message || "Application submitted successfully.");
+      setFormData((current) => ({ ...current, reason: "" }));
+    } catch (submissionError) {
+      setError(submissionError.response?.data?.message || "Failed to submit application.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl bg-white p-6 shadow-sm text-left">
-        <h2 className="text-2xl font-bold text-gray-900">Apply for Sponsorship</h2>
-        <p className="mt-2 text-gray-600">
-          Submit your request for financial assistance through an NGO sponsorship program.
-        </p>
-      </div>
+    <div style={{ display: "grid", gap: 24 }}>
+      <section
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(37,99,235,0.92) 58%, rgba(96,165,250,0.82) 100%)",
+          borderRadius: 28,
+          padding: 28,
+          color: "#FFFFFF",
+          boxShadow: "0 24px 60px rgba(15, 23, 42, 0.18)",
+        }}
+      >
+        <div style={{ maxWidth: 720 }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 12px",
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.12)",
+              border: "1px solid rgba(255,255,255,0.18)",
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              marginBottom: 18,
+            }}
+          >
+            Sponsorship Request
+          </div>
+          <h2 style={{ fontSize: 32, lineHeight: 1.1, marginBottom: 12 }}>Apply for financial support</h2>
+          <p style={{ color: "rgba(255,255,255,0.84)", fontSize: 16 }}>
+            Submit a clear, thoughtful request so partner NGOs can review your learning goals and
+            funding needs quickly.
+          </p>
+        </div>
+      </section>
 
       {!selectedProgram && (
-        <div className="rounded-2xl bg-yellow-50 p-6 shadow-sm text-left">
-          <p className="text-yellow-700">
-            No program selected. Please go to the Sponsorship Programs page and choose a program first.
+        <section style={{ ...sectionStyle, background: "#F8FBFF", borderColor: "#BFDBFE" }}>
+          <h3 style={{ fontSize: 20, marginBottom: 10, color: "#0F172A" }}>No program selected</h3>
+          <p style={{ color: "#64748B", marginBottom: 18 }}>
+            Start from the sponsorship catalog so your application is attached to the correct NGO
+            initiative.
           </p>
-
-          <button
-            onClick={() => navigate("/student/programs")}
-            className="mt-4 rounded-lg bg-black px-5 py-3 text-white font-semibold hover:bg-gray-800"
-          >
-            Go to Programs
+          <button type="button" className="btn btn-primary" onClick={() => navigate("/student/programs")}>
+            Go to programs
           </button>
-        </div>
+        </section>
       )}
 
       {selectedProgram && (
-        <div className="rounded-2xl bg-white p-6 shadow-sm text-left border border-gray-100">
-          <h3 className="text-xl font-semibold text-gray-900">{selectedProgram.title}</h3>
-          <p className="mt-2 text-gray-600">
-            {selectedProgram.description || "No description provided."}
-          </p>
-          <p className="mt-3 text-sm text-gray-500">
-            NGO: <span className="font-medium text-gray-700">{selectedProgram.ngoUser?.name || "N/A"}</span>
-          </p>
-        </div>
+        <section style={sectionStyle}>
+          <div className="section-header" style={{ marginBottom: 0 }}>
+            <div>
+              <h3 className="section-title">{selectedProgram.title}</h3>
+              <p className="section-sub">
+                {selectedProgram.description || "Support program for SkillBridge learners."}
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14, marginTop: 20 }}>
+            <div style={{ background: "#F8FBFF", border: "1px solid #DBEAFE", borderRadius: 18, padding: 16 }}>
+              <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", color: "#3B82F6", fontWeight: 800 }}>
+                NGO partner
+              </div>
+              <div style={{ marginTop: 6, fontSize: 17, fontWeight: 700, color: "#0F172A" }}>
+                {selectedProgram.ngoUser?.name || "SkillBridge Partner"}
+              </div>
+            </div>
+            <div style={{ background: "#F8FBFF", border: "1px solid #DBEAFE", borderRadius: 18, padding: 16 }}>
+              <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.08em", color: "#3B82F6", fontWeight: 800 }}>
+                Capacity
+              </div>
+              <div style={{ marginTop: 6, fontSize: 17, fontWeight: 700, color: "#0F172A" }}>
+                {selectedProgram.maxStudents || "Open"} learners
+              </div>
+            </div>
+          </div>
+        </section>
       )}
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm text-left">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Program ID
-            </label>
+      <section style={sectionStyle}>
+        <form onSubmit={handleSubmit} style={{ display: "grid", gap: 18 }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Program ID</label>
             <input
               type="text"
               name="programId"
               value={formData.programId}
               readOnly
-              className="w-full rounded-lg border bg-gray-50 px-4 py-3 text-gray-500"
+              className="form-control"
+              style={{ background: "#F8FAFC", color: "#64748B" }}
             />
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Reason for Sponsorship
-            </label>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Reason for sponsorship</label>
             <textarea
               name="reason"
               value={formData.reason}
               onChange={handleChange}
-              placeholder="Explain why you need sponsorship support..."
-              rows="5"
-              className="w-full rounded-lg border px-4 py-3"
+              placeholder="Describe your financial need, current learning goals, and how this support will help you finish your program."
+              rows="6"
+              className="form-control"
               required
             />
           </div>
 
-          {error && (
-            <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-              {error}
-            </div>
-          )}
+          {error && <div className="alert alert-error">{error}</div>}
+          {success && <div className="alert alert-success">{success}</div>}
 
-          {success && (
-            <div className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
-              {success}
-            </div>
-          )}
-
-          <div className="flex gap-3">
-            <button
-              type="submit"
-              disabled={loading || !formData.programId}
-              className="rounded-lg bg-black px-5 py-3 text-white font-semibold hover:bg-gray-800 disabled:opacity-50"
-            >
-              {loading ? "Submitting..." : "Submit Application"}
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <button type="submit" disabled={loading || !formData.programId} className="btn btn-primary">
+              {loading ? "Submitting..." : "Submit application"}
             </button>
-
-            <button
-              type="button"
-              onClick={() => navigate("/student/programs")}
-              className="rounded-lg border px-5 py-3 font-semibold text-gray-700 hover:bg-gray-50"
-            >
-              Back to Programs
+            <button type="button" onClick={() => navigate("/student/programs")} className="btn btn-secondary">
+              Back to programs
             </button>
           </div>
         </form>
-      </div>
+      </section>
     </div>
   );
 }

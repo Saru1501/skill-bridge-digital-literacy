@@ -4,11 +4,13 @@ const {
   createProgram,
   listPrograms,
   applyForSponsorship,
+  listMyApplications,
   listNgoApplications,
   reviewApplication,
   redeemSponsorshipCode,
   deleteProgram,
-  deleteApplication
+  deleteApplication,
+  updateProgram,
 } = require("../controllers/sponsorshipController");
 
 const router = express.Router();
@@ -19,6 +21,7 @@ router.get("/programs", protect, listPrograms);
 
 // Applications
 router.post("/applications", protect, authorize("student"), applyForSponsorship);
+router.get("/applications/my", protect, authorize("student"), listMyApplications);
 router.get("/applications", protect, authorize("ngo"), listNgoApplications);
 router.put(
   "/applications/:id/status",
@@ -37,6 +40,7 @@ router.delete(
   authorize("ngo"),
   deleteProgram
 );
+router.put("/programs/:id", protect, authorize("ngo"), updateProgram);
 
 // Delete application (Student)
 router.delete(

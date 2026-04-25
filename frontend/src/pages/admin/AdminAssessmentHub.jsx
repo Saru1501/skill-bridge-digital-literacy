@@ -26,7 +26,11 @@ export default function AdminAssessmentHub() {
   }
 
   return (
-    <div>
+    <div style={{ background: '#fff', minHeight: '100vh', padding: 32 }}>
+      <div style={{ background: '#1E293B', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>Assessment Hub</h1>
+      </div>
+
       <div className="section-header" style={{ marginBottom: 28 }}>
         <div>
           <h1 className="section-title">Assessment & Evaluation Engine</h1>

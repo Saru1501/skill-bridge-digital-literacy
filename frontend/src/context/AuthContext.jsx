@@ -79,6 +79,7 @@ export function AuthProvider({ children }) {
   const role      = auth.user?.role?.toLowerCase();
   const isAdmin   = role === "admin" || role === "university";
   const isStudent = role === "student";
+  const isNgo     = role === "ngo";
 
   const value = useMemo(() => ({
     user:            auth.user,
@@ -90,6 +91,7 @@ export function AuthProvider({ children }) {
     logout,
     isAdmin,
     isStudent,
+    isNgo,
   }), [auth, loading]);
 
   return (

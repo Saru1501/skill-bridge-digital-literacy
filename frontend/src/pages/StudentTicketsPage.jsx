@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { createSupportTicket, getMyTickets } from "../services/sponsorshipService";
 
-export default function StudentTicketsPage() {
-  const [formData, setFormData] = useState({
-    subject: "",
-    description: "",
-  });
+const getStatusClass = (status) => {
+  const normalized = String(status || "").toUpperCase();
+  if (normalized === "OPEN") return "status-pill--warning";
+  if (normalized === "IN_PROGRESS") return "status-pill--info";
+  if (normalized === "RESOLVED") return "status-pill--success";
+  return "status-pill--danger";
+};
 
+export default function StudentTicketsPage() {
+  const [formData, setFormData] = useState({ subject: "", description: "" });
   const [tickets, setTickets] = useState([]);
   const [loadingTickets, setLoadingTickets] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -30,15 +33,15 @@ export default function StudentTicketsPage() {
     fetchTickets();
   }, []);
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
+  const handleChange = (event) => {
+    setFormData((current) => ({
+      ...current,
+      [event.target.name]: event.target.value,
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setError("");
     setSuccess("");
 
@@ -51,10 +54,7 @@ export default function StudentTicketsPage() {
       setSubmitting(true);
       const data = await createSupportTicket(formData);
       setSuccess(data.message || "Ticket created successfully.");
-      setFormData({
-        subject: "",
-        description: "",
-      });
+      setFormData({ subject: "", description: "" });
       fetchTickets();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create ticket.");
@@ -63,126 +63,121 @@ export default function StudentTicketsPage() {
     }
   };
 
-  const getStatusBadge = (status) => {
-    if (status === "OPEN") return "bg-yellow-100 text-yellow-700";
-    if (status === "IN_PROGRESS") return "bg-blue-100 text-blue-700";
-    if (status === "RESOLVED") return "bg-green-100 text-green-700";
-    return "bg-gray-100 text-gray-700";
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl bg-white p-6 shadow-sm text-left">
-        <h2 className="text-2xl font-bold text-gray-900">Support Tickets</h2>
-        <p className="mt-2 text-gray-600">
-          Create a new support ticket and track your existing ticket requests.
-        </p>
-      </div>
+    <div className="workspace-stack">
+      <section className="workspace-hero">
+        <h2>Support Tickets</h2>
+        <p>Submit issues through a cleaner request form and track each ticket in a more readable card layout.</p>
+      </section>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm text-left">
-        <h3 className="text-xl font-semibold text-gray-900">Create New Ticket</h3>
+      {(error || success) && (
+        <div>
+          {error && <div className="alert alert-error">{error}</div>}
+          {success && <div className="alert alert-success">{success}</div>}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Subject
-            </label>
-            <input
-              type="text"
-              name="subject"
-              value={formData.subject}
-              onChange={handleChange}
-              placeholder="Enter ticket subject"
-              className="w-full rounded-lg border px-4 py-3"
-              required
-            />
+      <div className="workspace-grid">
+        <section className="content-panel">
+          <div className="content-panel__header">
+            <div>
+              <h3 className="content-panel__title">Create New Ticket</h3>
+              <p className="content-panel__sub">Describe the issue clearly so support can respond faster.</p>
+            </div>
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Describe your issue clearly..."
-              rows="5"
-              className="w-full rounded-lg border px-4 py-3"
-              required
-            />
-          </div>
-
-          {error && (
-            <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
-              {success}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-lg bg-black px-5 py-3 text-white font-semibold hover:bg-gray-800 disabled:opacity-50"
-          >
-            {submitting ? "Submitting..." : "Create Ticket"}
-          </button>
-        </form>
-      </div>
-
-      <div className="rounded-2xl bg-white p-6 shadow-sm text-left">
-        <h3 className="text-xl font-semibold text-gray-900">My Tickets</h3>
-
-        {loadingTickets ? (
-          <p className="mt-4 text-gray-500">Loading tickets...</p>
-        ) : tickets.length === 0 ? (
-          <p className="mt-4 text-gray-500">No tickets created yet.</p>
-        ) : (
-          <div className="mt-4 space-y-4">
-            {tickets.map((ticket) => (
-              <div
-                key={ticket._id}
-                className="rounded-xl border border-gray-100 p-4"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">
-                      {ticket.subject}
-                    </h4>
-                    <p className="mt-1 text-sm text-gray-600">
-                      {ticket.description}
-                    </p>
-                  </div>
-
-                  <span
-                    className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${getStatusBadge(
-                      ticket.status
-                    )}`}
-                  >
-                    {ticket.status}
-                  </span>
-                </div>
-
-                {ticket.adminResponse && (
-                  <div className="mt-3 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-700">
-                    <span className="font-medium">Admin Response:</span>{" "}
-                    {ticket.adminResponse}
-                  </div>
-                )}
-
-                <p className="mt-3 text-xs text-gray-400">
-                  Created: {new Date(ticket.createdAt).toLocaleString()}
-                </p>
+          <div className="content-panel__body">
+            <form onSubmit={handleSubmit} className="field-stack">
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Subject</label>
+                <input
+                  type="text"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  placeholder="Certificate not received after course completion"
+                  className="form-control"
+                  required
+                />
               </div>
-            ))}
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Description</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Explain what happened, what you expected, and any steps you already tried."
+                  rows="6"
+                  className="form-control"
+                  required
+                />
+              </div>
+
+              <div className="tile-actions">
+                <button type="submit" disabled={submitting} className="btn btn-primary">
+                  {submitting ? "Submitting..." : "Create Ticket"}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
+        </section>
+
+        <section className="content-panel">
+          <div className="content-panel__header">
+            <div>
+              <h3 className="content-panel__title">Support Tips</h3>
+              <p className="content-panel__sub">Useful guidance before you submit a request.</p>
+            </div>
+          </div>
+          <div className="content-panel__body">
+            <div className="stack-list">
+              <div className="tile-note">Mention the course, lesson, or feature where the issue happened.</div>
+              <div className="tile-note">If this is about certificates, rewards, or fee reductions, include what you already completed.</div>
+              <div className="tile-note">Current tickets in your queue: <strong>{tickets.length}</strong></div>
+            </div>
+          </div>
+        </section>
       </div>
+
+      <section className="content-panel">
+        <div className="content-panel__header">
+          <div>
+            <h3 className="content-panel__title">My Tickets</h3>
+            <p className="content-panel__sub">Your requests now appear as tiles with clear status and admin feedback.</p>
+          </div>
+        </div>
+
+        <div className="content-panel__body">
+          {loadingTickets ? (
+            <div className="empty-panel">Loading tickets...</div>
+          ) : tickets.length === 0 ? (
+            <div className="empty-panel">No tickets created yet.</div>
+          ) : (
+            <div className="stack-list">
+              {tickets.map((ticket) => (
+                <article key={ticket._id} className="tile-card tile-card--wide">
+                  <div className="tile-top">
+                    <div>
+                      <h4 className="tile-title">{ticket.subject}</h4>
+                      <p className="tile-subtitle">Created {new Date(ticket.createdAt).toLocaleString()}</p>
+                    </div>
+                    <span className={`status-pill ${getStatusClass(ticket.status)}`}>{ticket.status}</span>
+                  </div>
+
+                  <p className="tile-copy">{ticket.description}</p>
+
+                  {ticket.adminResponse && (
+                    <div className="tile-note">
+                      <strong>Admin Response:</strong> {ticket.adminResponse}
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

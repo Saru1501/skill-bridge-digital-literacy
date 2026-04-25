@@ -5,6 +5,8 @@ export const gamificationService = {
   getMyPoints: () => api.get("/points/my"),
   createPointRule: (data) => api.post("/points/rules", data),
   getPointRules: () => api.get("/points/rules"),
+  updatePointRule: (id, data) => api.put(`/points/rules/${id}`, data),
+  deletePointRule: (id) => api.delete(`/points/rules/${id}`),
 
   // Badges
   getMyBadges: () => api.get("/badges/my"),
@@ -40,3 +42,7 @@ export const gamificationService = {
   triggerQuizCompletion: (studentId, courseId, passed, score) =>
     api.post("/gamification/quiz-completed", { studentId, courseId, passed, score }),
 };
+
+export const getGamificationData = () => gamificationService.getAchievementVault();
+
+export default gamificationService;

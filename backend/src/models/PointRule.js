@@ -1,3 +1,4 @@
+//PointRule.js
 const mongoose = require("mongoose");
  
 const pointRuleSchema = new mongoose.Schema(

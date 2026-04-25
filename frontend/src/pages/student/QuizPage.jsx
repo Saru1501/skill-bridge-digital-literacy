@@ -106,10 +106,9 @@ export default function QuizPage() {
 
   // ── LIST ────────────────────────────────────────────────────────────────
   if (screen === SCREEN.LIST) return (
-    <div className="quiz-page">
-      <div className="quiz-page__header">
-        <h1>Course Quizzes</h1>
-        <p>Select a quiz to view details and start an attempt</p>
+    <div style={{ background: '#fff', minHeight: '100vh', padding: 32 }}>
+      <div style={{ background: '#1E293B', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>Quiz</h1>
       </div>
       {error && <div className="page-error">{error}</div>}
       {quizzes.length === 0 && <div className="empty-state">No quizzes available yet.</div>}
@@ -134,7 +133,10 @@ export default function QuizPage() {
 
   // ── CONFIRM ─────────────────────────────────────────────────────────────
   if (screen === SCREEN.CONFIRM) return (
-    <div className="quiz-page quiz-page--centered">
+    <div style={{ background: '#fff', minHeight: '100vh', padding: 32 }}>
+      <div style={{ background: '#1E293B', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>Quiz</h1>
+      </div>
       <button className="btn btn--ghost" onClick={handleBack}>← Back to Quizzes</button>
       <div className="quiz-confirm">
         <h2>{selected.title}</h2>
@@ -172,52 +174,60 @@ export default function QuizPage() {
 
   // ── ACTIVE ──────────────────────────────────────────────────────────────
   if (screen === SCREEN.ACTIVE && quizDetail) return (
-    <div className="quiz-active">
-      <div className="quiz-active__topbar">
-        <span className="quiz-active__title">{quizDetail.title}</span>
-        <span className="quiz-active__progress">
-          {answeredCount} / {quizDetail.questions.length} answered
-        </span>
-        {quizDetail.timeLimitMinutes && (
-          <QuizTimer
-            timeLimitMinutes={quizDetail.timeLimitMinutes}
-            startedAt={attempt.startedAt}
-            onTimeUp={() => handleSubmit(true)}
-          />
-        )}
+    <div style={{ background: '#fff', minHeight: '100vh', padding: 32 }}>
+      <div style={{ background: '#1E293B', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>Quiz</h1>
       </div>
+      <div className="quiz-active">
+        <div className="quiz-active__topbar">
+          <span className="quiz-active__title">{quizDetail.title}</span>
+          <span className="quiz-active__progress">
+            {answeredCount} / {quizDetail.questions.length} answered
+          </span>
+          {quizDetail.timeLimitMinutes && (
+            <QuizTimer
+              timeLimitMinutes={quizDetail.timeLimitMinutes}
+              startedAt={attempt.startedAt}
+              onTimeUp={() => handleSubmit(true)}
+            />
+          )}
+        </div>
 
-      <div className="quiz-active__body">
-        {quizDetail.questions.map((q, i) => (
-          <QuizQuestion
-            key={q._id}
-            question={q}
-            index={i}
-            total={quizDetail.questions.length}
-            answer={answers[q._id] || ''}
-            onChange={(val) => handleAnswer(q._id, val)}
-          />
-        ))}
-      </div>
+        <div className="quiz-active__body">
+          {quizDetail.questions.map((q, i) => (
+            <QuizQuestion
+              key={q._id}
+              question={q}
+              index={i}
+              total={quizDetail.questions.length}
+              answer={answers[q._id] || ''}
+              onChange={(val) => handleAnswer(q._id, val)}
+            />
+          ))}
+        </div>
 
-      {error && <div className="page-error" style={{ margin: '0 2rem' }}>{error}</div>}
+        {error && <div className="page-error" style={{ margin: '0 2rem' }}>{error}</div>}
 
-      <div className="quiz-active__footer">
-        <span>{quizDetail.questions.length - answeredCount} questions unanswered</span>
-        <button
-          className="btn btn--primary"
-          onClick={() => handleSubmit(false)}
-          disabled={submitting}
-        >
-          {submitting ? 'Submitting...' : 'Submit Quiz'}
-        </button>
+        <div className="quiz-active__footer">
+          <span>{quizDetail.questions.length - answeredCount} questions unanswered</span>
+          <button
+            className="btn btn--primary"
+            onClick={() => handleSubmit(false)}
+            disabled={submitting}
+          >
+            {submitting ? 'Submitting...' : 'Submit Quiz'}
+          </button>
+        </div>
       </div>
     </div>
   );
 
   // ── RESULT ──────────────────────────────────────────────────────────────
   if (screen === SCREEN.RESULT && result) return (
-    <div className="quiz-page quiz-page--centered">
+    <div style={{ background: '#fff', minHeight: '100vh', padding: 32 }}>
+      <div style={{ background: '#1E293B', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>Quiz</h1>
+      </div>
       <div className={`quiz-result ${result.isPassed ? 'quiz-result--pass' : 'quiz-result--fail'}`}>
         <div className="quiz-result__icon">{result.isPassed ? '🎉' : '😔'}</div>
         <h2>{result.isPassed ? 'You Passed!' : 'Not Quite'}</h2>

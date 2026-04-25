@@ -53,7 +53,10 @@ export default function MissionsPage() {
   if (error)   return <div className="page-error">{error}</div>;
 
   return (
-    <div className="missions-page">
+    <div style={{ background: '#fff', minHeight: '100vh', padding: 32 }}>
+      <div style={{ background: '#1E293B', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>Missions</h1>
+      </div>
 
       {/* Header */}
       <div className="missions-page__header">

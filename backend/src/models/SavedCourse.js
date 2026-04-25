@@ -1,3 +1,4 @@
+//SavedCourse.js
 const mongoose = require("mongoose");
 
 const savedCourseSchema = new mongoose.Schema(

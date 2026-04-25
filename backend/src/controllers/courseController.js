@@ -18,7 +18,8 @@ const getCourses = async (req, res) => {
   try {
     const { search, category, level, page = 1, limit = 10 } = req.query;
     const query = {};
-    if (!req.user || String(req.user.role).toLowerCase() !== "admin") query.isPublished = true;
+    // Only students should see only published courses; all other roles see all
+    if (!req.user || String(req.user.role).toLowerCase() === "student") query.isPublished = true;
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
@@ -45,7 +46,10 @@ const getCourseById = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id).populate("createdBy", "name email");
     if (!course) return res.status(404).json({ success: false, message: "Course not found" });
-    if (!course.isPublished && (!req.user || String(req.user.role).toLowerCase() !== "admin")) {
+    const isAdmin = req.user && (String(req.user.role).toLowerCase() === "admin" || String(req.user.role).toLowerCase() === "university");
+    const isCreator = req.user && course.createdBy && course.createdBy._id.toString() === req.user._id.toString();
+
+    if (course.isPublished === false && !isAdmin && !isCreator) {
       return res.status(403).json({ success: false, message: "Course not available" });
     }
     const lessons = await Lesson.find({ course: course._id }).sort({ order: 1 });

@@ -82,16 +82,9 @@ export default function Downloads() {
   if (loading) return <div className="page-loading"><div className="spinner"></div></div>;
 
   return (
-    <div>
-      <div className="section-header">
-        <div>
-          <h1 className="section-title">Downloads &amp; Offline</h1>
-          <p className="section-sub">Resources downloaded for offline access — {downloads.length} files</p>
-        </div>
-        <span style={{display:"flex",alignItems:"center",gap:6,fontSize:13,fontWeight:600,color:isOnline?"#16A34A":"#D97706",padding:"6px 12px",background:isOnline?"#F0FDF4":"#FEF3C7",borderRadius:20}}>
-          <span style={{width:8,height:8,borderRadius:"50%",background:isOnline?"#16A34A":"#D97706"}}></span>
-          {isOnline ? "Connected" : "Offline Mode"}
-        </span>
+    <div style={{ background: '#fff', minHeight: '100vh', padding: 32 }}>
+      <div style={{ background: '#1E293B', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>Downloads</h1>
       </div>
 
       {alert.msg && <div className={"alert alert-"+alert.type}>{alert.msg}</div>}

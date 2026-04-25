@@ -13,7 +13,7 @@ app.use(cors({
   credentials: true,
   allowedHeaders: ['Authorization', 'Content-Type'],
   exposedHeaders: ['Authorization', 'Content-Type'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -29,7 +29,10 @@ app.use("/api/courses",     require("./src/routes/courseRoutes"));
 app.use("/api/lessons",     require("./src/routes/lessonRoutes"));
 app.use("/api/enrollments", require("./src/routes/enrollmentRoutes"));
 app.use("/api/progress",    require("./src/routes/progressRoutes"));
+
+// Saved courses and resources
 app.use("/api/saved",       require("./src/routes/savedCourseRoutes"));
+app.use("/api/saved-resources", require("./src/routes/savedResourceRoutes"));
 
 // ── Component 2: Assessment & Evaluation ─────────────────────────────────────
 app.use("/api/missions",    require("./src/routes/missionRoutes"));

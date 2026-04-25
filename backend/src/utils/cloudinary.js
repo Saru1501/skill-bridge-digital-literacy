@@ -15,6 +15,8 @@ const uploadToCloudinary = async (filePath, folder = "skillbridge") => {
     url: result.secure_url,
     publicId: result.public_id,
     size: result.bytes,
+    resourceType: result.resource_type,
+    version: result.version,
   };
 };
 

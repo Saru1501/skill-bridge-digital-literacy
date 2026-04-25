@@ -122,13 +122,9 @@ export default function AdminQuizzesPage() {
   if (loading) return <div className="page-loading">Loading...</div>;
 
   return (
-    <div className="admin-page">
-      <div className="admin-page__header">
-        <h1>Manage Quizzes</h1>
-        <button className="btn btn--primary"
-          onClick={() => { setEditing(null); setForm(EMPTY_FORM); setShowForm(true); }}>
-          + New Quiz
-        </button>
+    <div style={{ background: '#fff', minHeight: '100vh', padding: 32 }}>
+      <div style={{ background: '#1E293B', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>Admin Quizzes</h1>
       </div>
 
       {error   && <div className="page-error">{error}</div>}

@@ -59,7 +59,11 @@ export default function ManageLessons() {
   if (loading) return <div className="page-loading"><div className="spinner"></div></div>;
 
   return (
-    <div>
+    <div style={{ background: '#fff', minHeight: '100vh', padding: 32 }}>
+      <div style={{ background: '#1E293B', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 28 }}>Manage Lessons</h1>
+      </div>
+
       <div style={{marginBottom:20}}>
         <button className="btn btn-secondary btn-sm" onClick={() => navigate("/admin/courses")}>
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>

@@ -75,7 +75,7 @@ describe("Component 1 - Unit Tests (Business Logic)", () => {
     test("enrollCourse should prevent duplicate enrollment", async () => {
       req.params.courseId = "course123";
       Course.findById.mockResolvedValue({ _id: "course123", isPublished: true });
-      Enrollment.findOne.mockResolvedValue({ _id: "existing_enrollment" });
+      Enrollment.findOne.mockResolvedValue({ _id: "existing_enrollment", isActive: true });
 
       await enrollCourse(req, res);
 
@@ -92,9 +92,48 @@ describe("Component 1 - Unit Tests (Business Logic)", () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Course is not available" }));
     });
+
+    test("enrollCourse should reactivate an inactive enrollment", async () => {
+      req.params.courseId = "course123";
+
+      const mockCourse = { _id: "course123", isPublished: true, enrollmentCount: 1, save: jest.fn() };
+      const mockEnrollment = {
+        _id: "existing_enrollment",
+        isActive: false,
+        completionStatus: "not_started",
+        completedAt: new Date("2026-01-01"),
+        save: jest.fn().mockResolvedValue({ _id: "existing_enrollment", isActive: true }),
+      };
+
+      Course.findById.mockResolvedValue(mockCourse);
+      Enrollment.findOne.mockResolvedValue(mockEnrollment);
+      Progress.findOne.mockResolvedValue({ completedLessons: ["lesson1"], isCourseCompleted: false });
+
+      await enrollCourse(req, res);
+
+      expect(mockEnrollment.isActive).toBe(true);
+      expect(mockEnrollment.completionStatus).toBe("in_progress");
+      expect(mockEnrollment.completedAt).toBeUndefined();
+      expect(mockEnrollment.save).toHaveBeenCalled();
+      expect(Enrollment.create).not.toHaveBeenCalled();
+      expect(mockCourse.enrollmentCount).toBe(2);
+      expect(mockCourse.save).toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Re-enrolled successfully" }));
+    });
   });
 
   describe("Progress Calculation & Completion Logic", () => {
+    test("updateLessonProgress should reject inactive enrollment", async () => {
+      req.params = { courseId: "course123", lessonId: "lesson1" };
+      Enrollment.findOne.mockResolvedValue(null);
+
+      await updateLessonProgress(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Not enrolled in this course" }));
+    });
+
     test("updateLessonProgress should correctly calculate percentage and trigger completion", async () => {
       req.params = { courseId: "course123", lessonId: "lesson1" };
       

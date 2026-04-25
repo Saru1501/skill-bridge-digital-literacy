@@ -35,6 +35,11 @@ export const createProgram = async (formData) => {
   return response.data;
 };
 
+export const updateProgram = async (programId, formData) => {
+  const response = await api.put(`/sponsorship/programs/${programId}`, formData);
+  return response.data;
+};
+
 export const getNgoApplications = async () => {
   const response = await api.get("/sponsorship/applications");
   return response.data;
@@ -50,6 +55,11 @@ export const reviewApplication = async (applicationId, formData) => {
 
 export const deleteProgram = async (programId) => {
   const response = await api.delete(`/sponsorship/programs/${programId}`);
+  return response.data;
+};
+
+export const deleteStudentApplication = async (applicationId) => {
+  const response = await api.delete(`/sponsorship/applications/${applicationId}`);
   return response.data;
 };
 
@@ -89,8 +99,17 @@ export const getNgoDashboardData = async () => {
 
 export const getAdminDashboardData = async () => {
   const ticketsRes = await api.get("/tickets");
-
   return {
     tickets: ticketsRes.data.tickets || [],
   };
+};
+
+export const getNgoPrograms = async () => {
+    const res = await api.get("/sponsorship/programs");
+    return res.data;
+};
+
+export const getStudentApplications = async () => {
+  const res = await api.get("/sponsorship/applications/my");
+  return res.data;
 };

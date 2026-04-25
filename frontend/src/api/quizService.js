@@ -15,4 +15,4 @@ export const getQuizById          = (id)                      => API.get(`/quizz
 export const startAttempt         = (quizId)                  => API.post(`/quizzes/${quizId}/attempt/start`);
 export const submitAttempt        = (quizId, attemptId, data) => API.post(`/quizzes/${quizId}/attempt/${attemptId}/submit`, data);
 export const getMyAttempts        = (quizId)                  => API.get(`/quizzes/${quizId}/attempts`);
-export const getCoursePerformance = (courseId)                => API.get(`/courses/${courseId}/performance`);
+export const getCoursePerformance = (courseId)                => API.get(`/performance/courses/${courseId}/performance`);

@@ -2,20 +2,29 @@ const Progress = require("../models/Progress");
 const Enrollment = require("../models/Enrollment");
 const Course = require("../models/Course");
 const { handleCourseCompletion } = require("./gamificationController");
+const EventEmitter = require("events");
+const progressEvents = new EventEmitter();
 
 const updateLessonProgress = async (req, res) => {
   try {
     const { courseId, lessonId } = req.params;
-    const enrollment = await Enrollment.findOne({ student: req.user._id, course: courseId });
+    const enrollment = await Enrollment.findOne({ student: req.user._id, course: courseId, isActive: true });
     if (!enrollment) return res.status(403).json({ success: false, message: "Not enrolled in this course" });
     let progress = await Progress.findOne({ student: req.user._id, course: courseId });
     if (!progress) progress = await Progress.create({ student: req.user._id, course: courseId });
-    if (!progress.completedLessons.includes(lessonId)) progress.completedLessons.push(lessonId);
+    let lessonCompleted = false;
+    if (!progress.completedLessons.includes(lessonId)) {
+      progress.completedLessons.push(lessonId);
+      lessonCompleted = true;
+    }
     progress.lastAccessedLesson = lessonId;
     progress.lastAccessedAt = Date.now();
     const course = await Course.findById(courseId);
     progress.completionPercentage = course.totalLessons > 0
       ? Math.round((progress.completedLessons.length / course.totalLessons) * 100) : 0;
+    if (lessonCompleted) {
+      progressEvents.emit("lessonCompleted", { studentId: req.user._id, courseId, lessonId });
+    }
     if (progress.completionPercentage === 100 && !progress.isCourseCompleted) {
       progress.isCourseCompleted = true;
       progress.courseCompletedAt = Date.now();
@@ -23,6 +32,7 @@ const updateLessonProgress = async (req, res) => {
       enrollment.completedAt = Date.now();
       await enrollment.save();
       await handleCourseCompletion({ body: { studentId: req.user._id, courseId } }, { status: () => ({ json: () => {} }) });
+      progressEvents.emit("courseCompleted", { studentId: req.user._id, courseId });
     } else if (progress.completedLessons.length > 0) {
       enrollment.completionStatus = "in_progress";
       await enrollment.save();
@@ -88,4 +98,4 @@ const syncOfflineProgress = async (req, res) => {
   }
 };
 
-module.exports = { updateLessonProgress, getCourseProgress, trackDownload, syncOfflineProgress };
+module.exports = { updateLessonProgress, getCourseProgress, trackDownload, syncOfflineProgress, progressEvents };

@@ -1,3 +1,4 @@
+//SponsorshipApplication.js
 const mongoose = require("mongoose");
 
 const sponsorshipApplicationSchema = new mongoose.Schema(

@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { getNgoApplications, reviewApplication } from "../services/sponsorshipService";
 
+const getStatusClass = (status) => {
+  const normalized = String(status || "").toUpperCase();
+  if (normalized === "PENDING") return "status-pill--warning";
+  if (normalized === "APPROVED") return "status-pill--success";
+  if (normalized === "REJECTED") return "status-pill--danger";
+  return "status-pill--info";
+};
+
 export default function NgoApplicationsPage() {
   const [applications, setApplications] = useState([]);
   const [loadingApplications, setLoadingApplications] = useState(true);
@@ -30,10 +38,7 @@ export default function NgoApplicationsPage() {
 
       const data = await reviewApplication(applicationId, {
         status,
-        reviewNote:
-          status === "APPROVED"
-            ? "Approved successfully."
-            : "Rejected based on review.",
+        reviewNote: status === "APPROVED" ? "Approved successfully." : "Rejected based on review.",
       });
 
       setSuccess(data.message || "Application updated successfully.");
@@ -43,102 +48,80 @@ export default function NgoApplicationsPage() {
     }
   };
 
-  const getStatusBadge = (status) => {
-    if (status === "PENDING") return "bg-yellow-100 text-yellow-700";
-    if (status === "APPROVED") return "bg-green-100 text-green-700";
-    if (status === "REJECTED") return "bg-red-100 text-red-700";
-    return "bg-gray-100 text-gray-700";
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl bg-white p-6 shadow-sm text-left">
-        <h2 className="text-2xl font-bold text-gray-900">Sponsorship Applications</h2>
-        <p className="mt-2 text-gray-600">
-          Review student applications and approve or reject them.
-        </p>
-      </div>
+    <div className="workspace-stack">
+      <section className="workspace-hero">
+        <h2>Sponsorship Applications</h2>
+        <p>Review student requests in a structured tile layout, then approve or reject them with clearer status visibility.</p>
+      </section>
 
-      {error && (
-        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-          {error}
+      {(error || success) && (
+        <div>
+          {error && <div className="alert alert-error">{error}</div>}
+          {success && <div className="alert alert-success">{success}</div>}
         </div>
       )}
 
-      {success && (
-        <div className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
-          {success}
+      <section className="content-panel">
+        <div className="content-panel__header">
+          <div>
+            <h3 className="content-panel__title">Applicant Review Queue</h3>
+            <p className="content-panel__sub">Each application now appears as a readable review tile instead of a plain text block.</p>
+          </div>
         </div>
-      )}
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm text-left">
-        {loadingApplications ? (
-          <p className="text-gray-500">Loading applications...</p>
-        ) : applications.length === 0 ? (
-          <p className="text-gray-500">No applications found.</p>
-        ) : (
-          <div className="space-y-4">
-            {applications.map((application) => (
-              <div
-                key={application._id}
-                className="rounded-xl border border-gray-100 p-4"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">
-                      {application.studentUser?.name || "Student"}
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      {application.studentUser?.email || "No email"}
-                    </p>
-                    <p className="mt-2 text-sm text-gray-700">
-                      <span className="font-medium">Program:</span>{" "}
-                      {application.program?.title || "N/A"}
-                    </p>
-                    <p className="mt-2 text-sm text-gray-600">
-                      <span className="font-medium text-gray-800">Reason:</span>{" "}
-                      {application.reason}
-                    </p>
+        <div className="content-panel__body">
+          {loadingApplications ? (
+            <div className="empty-panel">Loading applications...</div>
+          ) : applications.length === 0 ? (
+            <div className="empty-panel">No applications found.</div>
+          ) : (
+            <div className="stack-list">
+              {applications.map((application) => (
+                <article key={application._id} className="tile-card tile-card--wide">
+                  <div className="tile-top">
+                    <div>
+                      <h4 className="tile-title">{application.studentUser?.name || "Student Applicant"}</h4>
+                      <p className="tile-subtitle">{application.studentUser?.email || "No email available"}</p>
+                    </div>
+                    <span className={`status-pill ${getStatusClass(application.status)}`}>
+                      {application.status}
+                    </span>
+                  </div>
 
+                  <div className="tile-meta">
+                    <div className="tile-meta-row">
+                      <span>Program</span>
+                      <strong>{application.program?.title || "N/A"}</strong>
+                    </div>
                     {application.sponsorshipCode && (
-                      <p className="mt-2 text-sm text-gray-600">
-                        <span className="font-medium text-gray-800">Code:</span>{" "}
-                        {application.sponsorshipCode}
-                      </p>
+                      <div className="tile-meta-row">
+                        <span>Sponsorship Code</span>
+                        <strong>{application.sponsorshipCode}</strong>
+                      </div>
                     )}
                   </div>
 
-                  <span
-                    className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${getStatusBadge(
-                      application.status
-                    )}`}
-                  >
-                    {application.status}
-                  </span>
-                </div>
-
-                {application.status === "PENDING" && (
-                  <div className="mt-4 flex gap-3">
-                    <button
-                      onClick={() => handleReview(application._id, "APPROVED")}
-                      className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
-                    >
-                      Approve
-                    </button>
-
-                    <button
-                      onClick={() => handleReview(application._id, "REJECTED")}
-                      className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
-                    >
-                      Reject
-                    </button>
+                  <div className="tile-note">
+                    <strong>Reason:</strong> {application.reason}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+
+                  {String(application.status).toUpperCase() === "PENDING" && (
+                    <div className="tile-actions">
+                      <button onClick={() => handleReview(application._id, "APPROVED")} className="btn btn-success btn-sm">
+                        Approve
+                      </button>
+                      <button onClick={() => handleReview(application._id, "REJECTED")} className="btn btn-danger btn-sm">
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

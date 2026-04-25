@@ -1,3 +1,4 @@
+//Lesson.js
 const mongoose = require("mongoose");
 
 const lessonSchema = new mongoose.Schema(
@@ -14,7 +15,9 @@ const lessonSchema = new mongoose.Schema(
         name: { type: String },
         url: { type: String },
         publicId: { type: String },
-        type: { type: String, enum: ["pdf", "video", "slides", "other"] },
+        version: { type: String },
+        type: { type: String, enum: ["pdf", "video", "slides", "image", "other"] },
+        cloudinaryResourceType: { type: String, default: "image" },
         size: { type: Number },
         isDownloadable: { type: Boolean, default: true },
       },

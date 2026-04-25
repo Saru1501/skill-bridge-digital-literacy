@@ -1,3 +1,4 @@
+//SupportTicket.js
 const mongoose = require("mongoose");
 
 const supportTicketSchema = new mongoose.Schema(

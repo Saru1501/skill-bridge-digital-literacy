@@ -1,3 +1,4 @@
+//UserPoints.js
 const mongoose = require("mongoose");
  
 const userPointsSchema = new mongoose.Schema(

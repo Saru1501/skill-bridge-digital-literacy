@@ -100,6 +100,25 @@ describe("Component 1 - Integration Tests", () => {
       expect(dupRes.status).toBe(400); // Controller returns 400 for 'Already enrolled'
     });
 
+    test("Student can re-enroll after unenrolling", async () => {
+      const unenrollRes = await request(app)
+        .delete(`/api/enrollments/${courseId}`)
+        .set("Authorization", `Bearer ${studentToken}`);
+      expect(unenrollRes.status).toBe(200);
+
+      const reenrollRes = await request(app)
+        .post(`/api/enrollments/${courseId}`)
+        .set("Authorization", `Bearer ${studentToken}`);
+      expect(reenrollRes.status).toBe(200);
+      expect(reenrollRes.body.message).toBe("Re-enrolled successfully");
+
+      const statusRes = await request(app)
+        .get(`/api/enrollments/${courseId}/status`)
+        .set("Authorization", `Bearer ${studentToken}`);
+      expect(statusRes.status).toBe(200);
+      expect(statusRes.body.isEnrolled).toBe(true);
+    });
+
     test("Progress auto-updates on lesson completion", async () => {
       const res = await request(app)
         .patch(`/api/progress/${courseId}/lessons/${lessonId}`)

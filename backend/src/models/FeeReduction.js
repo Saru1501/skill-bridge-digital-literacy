@@ -1,3 +1,4 @@
+//FeeReduction.js
 const mongoose = require("mongoose");
  
 const feeReductionSchema = new mongoose.Schema(

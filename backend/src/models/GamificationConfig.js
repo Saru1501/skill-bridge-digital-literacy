@@ -1,3 +1,5 @@
+//GamificationConfig.js
+
 const mongoose = require("mongoose");
  
 const gamificationConfigSchema = new mongoose.Schema(

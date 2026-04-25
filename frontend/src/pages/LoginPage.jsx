@@ -1,80 +1,125 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
-  const navigate  = useNavigate();
-  const { login, loading } = useAuth();
-
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error,    setError]    = useState("");
-
-  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-
-  const getDashboardPath = (role) => {
-    const r = role?.toLowerCase();
-    if (r === "admin" || r === "university") return "/admin";
-    if (r === "ngo")     return "/ngo";
-    if (r === "student") return "/dashboard";
-    return "/login";
-  };
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     setError("");
     try {
-      const user = await login(formData.email, formData.password);
-      navigate(getDashboardPath(user?.role), { replace: true });
+      const user = await login(email, password);
+      const role = String(user?.role || "").toLowerCase();
+
+      if (role === "admin" || role === "university") navigate("/admin");
+      else if (role === "ngo") navigate("/ngo");
+      else navigate("/dashboard");
     } catch (err) {
-      setError(err?.response?.data?.message || "Login failed. Please try again.");
+      setError(err.response?.data?.message || "Invalid credentials. Please verify your details.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ minHeight:"100vh", backgroundColor:"#f6f6f3", display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }}>
-      <div style={{ backgroundColor:"white", borderRadius:"24px", padding:"40px", maxWidth:"400px", width:"100%", boxShadow:"0 4px 12px rgba(0,0,0,0.1)" }}>
-        <div style={{ textAlign:"center", marginBottom:"32px" }}>
-          <div style={{ fontSize:"36px", fontWeight:700, color:"#2563EB", marginBottom:"12px" }}>SkillBridge</div>
-          <h1 style={{ fontSize:"24px", fontWeight:600, color:"#0F172A" }}>Welcome back</h1>
-          <p style={{ color:"#64748B", marginTop:"6px", fontSize:"14px" }}>Log in to continue your learning journey</p>
+    <div style={{ background: '#1E293B', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
+      <div className="auth-card" style={{ background: '#fff', borderRadius: 18, boxShadow: '0 8px 32px rgba(30,41,59,0.10)', maxWidth: 420, width: '100%', margin: 32 }}>
+        <div className="auth-card-header" style={{ padding: '32px 32px 18px 32px', borderBottom: '1.5px solid #F1F5F9', textAlign: 'center' }}>
+          <div className="auth-logo" style={{background: 'linear-gradient(135deg, #3B82F6 0%, #1E293B 100%)', color: 'white', width: 54, height: 54, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto'}}>
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+            </svg>
+          </div>
+          <h1 style={{ color: '#1E293B', fontWeight: 800, fontSize: 26, margin: 0 }}>Platform Access</h1>
+          <p style={{ color: '#64748B', fontWeight: 500, margin: '8px 0 0 0' }}>Login to the SkillBridge Digital Literacy Hub</p>
         </div>
 
-        {error && (
-          <div style={{ backgroundColor:"#FEE2E2", color:"#B91C1C", padding:"12px", borderRadius:"10px", marginBottom:"16px", fontSize:"14px" }}>
-            {error}
+        <div className="auth-body" style={{ padding: 32 }}>
+          {error && <div className="alert alert-error" style={{textAlign:"center"}}>{error}</div>}
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label" style={{display:"flex", alignItems:"center", gap:6, color: '#1E293B', fontWeight: 600}}>
+                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                 Email Address
+              </label>
+              <input
+                type="email"
+                className="form-control"
+                style={{ background: '#F8FAFC', border: '1.5px solid #E2E8F0', color: '#1E293B', borderRadius: 10, marginTop: 4 }}
+                placeholder="university.id@skill-bridge.org"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group" style={{marginBottom: 24}}>
+              <label className="form-label" style={{display:"flex", alignItems:"center", gap:6, color: '#1E293B', fontWeight: 600}}>
+                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                 Security Code
+              </label>
+              <input
+                type="password"
+                className="form-control"
+                style={{ background: '#F8FAFC', border: '1.5px solid #E2E8F0', color: '#1E293B', borderRadius: 10, marginTop: 4 }}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="btn-auth"
+              disabled={loading}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                width: "220px",
+                minHeight: 48,
+                margin: "8px auto 0",
+                background: "#1E293B",
+                color: "#fff",
+                fontWeight: 700,
+                borderRadius: 10,
+                fontSize: 16,
+                padding: "12px 20px",
+                textAlign: "center",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {loading ? (
+                <>
+                  <div className="spinner" style={{width:16, height:16, borderTopColor:"white"}}></div>
+                  <span>Authenticating...</span>
+                </>
+              ) : (
+                <span style={{ color: "#fff", width: "100%", textAlign: "center" }}>Sign In to Dashboard</span>
+              )}
+            </button>
+          </form>
+
+          <div style={{marginTop: 32, paddingTop: 24, borderTop: "1px solid #E2E8F0", textAlign: "center"}}>
+             <p className="auth-footer" style={{margin:0, color: '#64748B'}}>
+               No workspace account? <Link to="/register" style={{color: "#1E293B", fontWeight: 800}}>Register Here</Link>
+             </p>
           </div>
-        )}
-
-        <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:"16px" }}>
-          <div>
-            <label style={{ display:"block", fontSize:"13px", fontWeight:600, color:"#374151", marginBottom:"6px" }}>Email</label>
-            <input type="email" name="email" placeholder="your@email.com" value={formData.email}
-              onChange={handleChange} required
-              style={{ width:"100%", padding:"11px 14px", border:"1.5px solid #E2E8F0", borderRadius:"10px", fontSize:"14px", outline:"none" }} />
-          </div>
-          <div>
-            <label style={{ display:"block", fontSize:"13px", fontWeight:600, color:"#374151", marginBottom:"6px" }}>Password</label>
-            <input type="password" name="password" placeholder="Your password" value={formData.password}
-              onChange={handleChange} required
-              style={{ width:"100%", padding:"11px 14px", border:"1.5px solid #E2E8F0", borderRadius:"10px", fontSize:"14px", outline:"none" }} />
-          </div>
-
-          <button type="submit" disabled={loading}
-            style={{ width:"100%", padding:"13px", background:"#2563EB", color:"#fff", border:"none", borderRadius:"10px",
-              fontSize:"15px", fontWeight:600, cursor:"pointer", opacity:loading?0.7:1 }}>
-            {loading ? "Logging in..." : "Log In"}
-          </button>
-        </form>
-
-        <div style={{ textAlign:"center", marginTop:"20px", fontSize:"14px" }}>
-          <span style={{ color:"#64748B" }}>Don't have an account? </span>
-          <Link to="/register" style={{ color:"#2563EB", fontWeight:600, textDecoration:"none" }}>Sign up</Link>
-        </div>
-
-        <div style={{ marginTop:"20px", padding:"12px", background:"#F8FAFC", borderRadius:"10px", fontSize:"12px", color:"#94A3B8", textAlign:"center" }}>
-          Roles: student &bull; university &bull; ngo &bull; admin
         </div>
       </div>
+      <style>{`
+        .spinner { border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 2px solid white; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 }

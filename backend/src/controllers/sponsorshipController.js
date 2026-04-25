@@ -33,7 +33,10 @@ const createProgram = async (req, res) => {
 // Anyone logged-in: list active programs
 const listPrograms = async (req, res) => {
   try {
-    const programs = await SponsorshipProgram.find({ active: true })
+    const isNgo = String(req.user?.role || "").toLowerCase() === "ngo";
+    const query = isNgo ? { ngoUser: req.user._id } : { active: true };
+
+    const programs = await SponsorshipProgram.find(query)
       .populate("ngoUser", "name email role")
       .sort({ createdAt: -1 });
 
@@ -90,6 +93,27 @@ const listNgoApplications = async (req, res) => {
     const applications = await SponsorshipApplication.find({ program: { $in: programIds } })
       .populate("studentUser", "name email role")
       .populate("program", "title")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({ applications });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || "Server error" });
+  }
+};
+
+// Student: list own applications
+const listMyApplications = async (req, res) => {
+  try {
+    const applications = await SponsorshipApplication.find({
+      studentUser: req.user._id,
+    })
+      .populate({
+        path: "program",
+        populate: {
+          path: "ngoUser",
+          select: "name email role",
+        },
+      })
       .sort({ createdAt: -1 });
 
     return res.status(200).json({ applications });
@@ -192,6 +216,41 @@ const deleteProgram = async (req, res) => {
   }
 };
 
+// NGO: update sponsorship program
+const updateProgram = async (req, res) => {
+  try {
+    const program = await SponsorshipProgram.findById(req.params.id);
+
+    if (!program) {
+      return res.status(404).json({ message: "Program not found" });
+    }
+
+    if (String(program.ngoUser) !== String(req.user._id)) {
+      return res.status(403).json({ message: "Forbidden: not your program" });
+    }
+
+    const { title, description, maxStudents, active } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ message: "title is required" });
+    }
+
+    program.title = title;
+    program.description = description || "";
+    program.maxStudents = Number(maxStudents) || 0;
+    program.active = active !== undefined ? active : program.active;
+
+    await program.save();
+
+    return res.status(200).json({
+      message: "Program updated successfully",
+      program,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || "Server error" });
+  }
+};
+
 // Student: delete their sponsorship application
 const deleteApplication = async (req, res) => {
   try {
@@ -230,7 +289,9 @@ module.exports = {
   applyForSponsorship,
   deleteProgram,
   deleteApplication,
+  listMyApplications,
   listNgoApplications,
   reviewApplication,
   redeemSponsorshipCode,
+  updateProgram,
 };

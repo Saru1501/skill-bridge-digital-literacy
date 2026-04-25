@@ -14,6 +14,10 @@ export default function ManageCourses() {
   const [alert,   setAlert]   = useState({ msg:"", type:"" });
   const [loading, setLoading] = useState(true);
   const [saving,  setSaving]  = useState(false);
+  // Filter states
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterLevel, setFilterLevel] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
 
   const flash = (msg, type="success") => { setAlert({msg,type}); setTimeout(()=>setAlert({msg:"",type:""}),3500); };
   const load  = async () => { try { const r = await getCourses({limit:100}); setCourses(r.data.data||[]); } catch {} setLoading(false); };
@@ -44,17 +48,57 @@ export default function ManageCourses() {
 
   if (loading) return <div className="page-loading"><div className="spinner"></div></div>;
 
+  // Filtering logic
+  const filteredCourses = courses.filter(c =>
+    (!filterCategory || c.category === filterCategory) &&
+    (!filterLevel || c.level === filterLevel) &&
+    (!filterStatus || (filterStatus === "published" ? c.isPublished : !c.isPublished))
+  );
+
   return (
-    <div>
-      <div className="section-header">
-        <div>
-          <h1 className="section-title">Manage Courses</h1>
-          <p className="section-sub">{courses.length} total courses</p>
-        </div>
-        <button className="btn btn-primary" onClick={openAdd}>
-          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>
-          Add Course
+    <div style={{ background: '#fff', minHeight: '100vh', padding: 32 }}>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1E293B', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+        <h1 style={{ color: '#fff', fontWeight: 700, fontSize: 28, margin: 0 }}>Manage Courses</h1>
+        <button
+          onClick={openAdd}
+          style={{
+            background: '#006ff6',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 16,
+            border: 'none',
+            borderRadius: 12,
+            padding: '12px 28px',
+            boxShadow: '0 2px 8px rgba(96,165,250,0.10)',
+            cursor: 'pointer',
+            transition: 'background 0.2s',
+            outline: 'none',
+            marginLeft: 24
+          }}
+        >
+          + Create Course
         </button>
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 16, marginBottom: 24, alignItems: 'center' }}>
+        <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="form-control" style={{ minWidth: 160 }}>
+          <option value="">All Categories</option>
+          {CATS.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)} className="form-control" style={{ minWidth: 140 }}>
+          <option value="">All Levels</option>
+          {LVLS.map(l => <option key={l} value={l}>{l.charAt(0).toUpperCase() + l.slice(1)}</option>)}
+        </select>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="form-control" style={{ minWidth: 140 }}>
+          <option value="">All Statuses</option>
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+        </select>
+        {(filterCategory || filterLevel || filterStatus) && (
+          <button className="btn btn-secondary" onClick={() => { setFilterCategory(""); setFilterLevel(""); setFilterStatus(""); }}>Clear Filters</button>
+        )}
       </div>
 
       {alert.msg && <div className={"alert alert-"+alert.type}>{alert.msg}</div>}
@@ -108,8 +152,8 @@ export default function ManageCourses() {
         <table className="table">
           <thead><tr><th>Title</th><th>Category</th><th>Level</th><th>Lessons</th><th>Enrolled</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
-            {courses.length===0 && <tr><td colSpan={7} style={{textAlign:"center",color:"#94A3B8",padding:40}}>No courses yet. Click "Add Course" to create your first course.</td></tr>}
-            {courses.map(c => (
+            {filteredCourses.length===0 && <tr><td colSpan={7} style={{textAlign:"center",color:"#94A3B8",padding:40}}>No courses found. Adjust your filters or click "Add Course" to create a new course.</td></tr>}
+            {filteredCourses.map(c => (
               <tr key={c._id}>
                 <td><div style={{fontWeight:600}}>{c.title}</div><div style={{fontSize:12,color:"#94A3B8",marginTop:2}}>{c.tags?.join(", ")}</div></td>
                 <td><span className="badge badge-blue">{c.category}</span></td>
