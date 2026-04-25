@@ -10,6 +10,7 @@ import {
   toggleSaveResource,
   trackDownload,
 } from "../../services/api";
+import { buildApiUrl } from "../../config/api";
 
 // ── Offline helpers ────────────────────────────────────────────────────────────
 const OL_KEY = (courseId) => `sb_offline_${courseId}`;
@@ -27,8 +28,7 @@ function ResourceViewer({ resource, onClose, lessonId }) {
   const isVideo = resource.type === "video" || resource.url?.toLowerCase().match(/\.(mp4|webm|ogg)$/);
   const isImage = resource.type === "image" || resource.url?.toLowerCase().match(/\.(png|jpg|jpeg|gif|webp)$/);
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3001/api";
-  const proxyUrl = `${API_BASE_URL}/lessons/${lessonId}/resources/${resource._id}/download`;
+  const proxyUrl = buildApiUrl(`/lessons/${lessonId}/resources/${resource._id}/download`);
   const viewUrl = isPDF ? proxyUrl : resource.url;
 
   // Download URL logic: always use backend proxy for all types
@@ -188,8 +188,7 @@ export default function LessonView() {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3001/api";
-      const proxyUrl = `${API_BASE_URL}/lessons/${id}/resources/${resource._id}/download?download=true`;
+      const proxyUrl = buildApiUrl(`/lessons/${id}/resources/${resource._id}/download?download=true`);
       window.open(proxyUrl, "_blank", "noopener,noreferrer");
     }
   };
@@ -326,9 +325,8 @@ export default function LessonView() {
                         </button>
                         {r.isDownloadable && (
                           (() => {
-                            const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3001/api";
                             const token = localStorage.getItem("token");
-                            const downloadUrl = `${API_BASE_URL}/lessons/${id}/resources/${r._id}/download?download=true${token ? `&token=${encodeURIComponent(token)}` : ''}`;
+                            const downloadUrl = `${buildApiUrl(`/lessons/${id}/resources/${r._id}/download`)}?download=true${token ? `&token=${encodeURIComponent(token)}` : ''}`;
                             return (
                               <a
                                 className="btn btn-primary"

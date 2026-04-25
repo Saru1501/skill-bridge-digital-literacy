@@ -6,10 +6,20 @@ const connectDB = require("./src/config/db");
 dotenv.config();
 
 const app = express();
+const allowedOrigins = (process.env.CORS_ORIGIN || process.env.FRONTEND_URL || "http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowAllOrigins = allowedOrigins.includes("*");
 
-// CORS configuration to allow frontend origin, credentials, and custom headers
+// Allow local development plus deployed frontends configured via env vars.
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin(origin, callback) {
+    if (!origin || allowAllOrigins || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
   credentials: true,
   allowedHeaders: ['Authorization', 'Content-Type'],
   exposedHeaders: ['Authorization', 'Content-Type'],

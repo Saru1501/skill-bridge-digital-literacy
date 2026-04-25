@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getLessonById, uploadResource, deleteResource } from "../../services/api";
+import { buildApiUrl } from "../../config/api";
 
 const TYPES = ["pdf","video","slides","other"];
 
@@ -112,7 +113,7 @@ export default function ManageResources() {
                   <iframe 
                     src={preview.url && preview.url.includes("cloudinary") 
                       ? preview.url.replace("/upload/", "/upload/fl_inline/") 
-                      : `${process.env.REACT_APP_API_URL || "http://localhost:3001/api"}/lessons/${lessonId}/resources/${preview._id}/download`
+                      : buildApiUrl(`/lessons/${lessonId}/resources/${preview._id}/download`)
                     } 
                     style={{width:"100%",height:"100%",border:"none",borderRadius:8,background:"#fff"}} 
                     title={preview.name}
