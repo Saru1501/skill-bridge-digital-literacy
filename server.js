@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const connectDB = require("./src/config/db");
+const connectDB = require("./backend/src/config/db");
 
 dotenv.config();
 
@@ -15,33 +15,34 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req, res) => res.status(200).json({ success: true, message: "SkillBridge API running" }));
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
-app.use("/api/auth", require("./src/routes/authRoutes"));
+app.use("/api/auth", require("./backend/src/routes/authRoutes"));
 
 // ── Component 1: Learning Management & Offline Delivery ──────────────────────
-app.use("/api/courses",     require("./src/routes/courseRoutes"));
-app.use("/api/lessons",     require("./src/routes/lessonRoutes"));
-app.use("/api/enrollments", require("./src/routes/enrollmentRoutes"));
-app.use("/api/progress",    require("./src/routes/progressRoutes"));
-app.use("/api/saved",       require("./src/routes/savedCourseRoutes"));
+app.use("/api/courses",     require("./backend/src/routes/courseRoutes"));
+app.use("/api/lessons",     require("./backend/src/routes/lessonRoutes"));
+app.use("/api/enrollments", require("./backend/src/routes/enrollmentRoutes"));
+app.use("/api/progress",    require("./backend/src/routes/progressRoutes"));
+app.use("/api/saved",       require("./backend/src/routes/savedCourseRoutes"));
+app.use("/api/saved-resources", require("./backend/src/routes/savedResourceRoutes"));
 
 // ── Component 2: Assessment & Evaluation ─────────────────────────────────────
-app.use("/api/missions",    require("./src/routes/missionRoutes"));
-app.use("/api/submissions", require("./src/routes/missionSubmissionRoutes"));
-app.use("/api/quizzes",     require("./src/routes/quizRoutes"));
-app.use("/api/performance", require("./src/routes/performanceRoutes"));
+app.use("/api/missions",    require("./backend/src/routes/missionRoutes"));
+app.use("/api/submissions", require("./backend/src/routes/missionSubmissionRoutes"));
+app.use("/api/quizzes",     require("./backend/src/routes/quizRoutes"));
+app.use("/api/performance", require("./backend/src/routes/performanceRoutes"));
 
 // ── Component 3: Gamification, Rewards & Certification ───────────────────────
-app.use("/api/badges",        require("./src/routes/badgeRoutes"));
-app.use("/api/points",        require("./src/routes/pointsRoutes"));
-app.use("/api/certificates",  require("./src/routes/certificateRoutes"));
-app.use("/api/leaderboard",   require("./src/routes/leaderboardRoutes"));
-app.use("/api/fee-reduction", require("./src/routes/feeReductionRoutes"));
-app.use("/api/gamification",  require("./src/routes/gamificationRoutes"));
+app.use("/api/badges",        require("./backend/src/routes/badgeRoutes"));
+app.use("/api/points",        require("./backend/src/routes/pointsRoutes"));
+app.use("/api/certificates",  require("./backend/src/routes/certificateRoutes"));
+app.use("/api/leaderboard",   require("./backend/src/routes/leaderboardRoutes"));
+app.use("/api/fee-reduction", require("./backend/src/routes/feeReductionRoutes"));
+app.use("/api/gamification",  require("./backend/src/routes/gamificationRoutes"));
 
 // ── Component 4: Sponsorship, Payments & Support ─────────────────────────────
-app.use("/api/sponsorship", require("./src/routes/sponsorshipRoutes"));
-app.use("/api/tickets",     require("./src/routes/ticketRoutes"));
-app.use("/api/payments",    require("./src/routes/paymentRoutes"));
+app.use("/api/sponsorship", require("./backend/src/routes/sponsorshipRoutes"));
+app.use("/api/tickets",     require("./backend/src/routes/ticketRoutes"));
+app.use("/api/payments",    require("./backend/src/routes/paymentRoutes"));
 
 // 404 handler
 app.use((req, res) => {

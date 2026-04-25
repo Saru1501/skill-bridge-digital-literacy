@@ -106,35 +106,36 @@ export default function ManageResources() {
             <button onClick={()=>setPreview(null)} style={{background:"rgba(255,255,255,0.1)",border:"none",color:"#fff",padding:"6px 12px",borderRadius:6,cursor:"pointer",fontWeight:600}}>Close</button>
           </div>
           <div style={{flex:1,overflow:"hidden",padding:16,display:"flex",alignItems:"center",justifyContent:"center"}}>
-            {/* PDF Preview (Cloudinary fl_inline only for PDFs) */}
-            {preview.type === "pdf" ? (
-              <iframe
-                src={
-                  preview.url && preview.url.includes("cloudinary")
-                    ? preview.url.replace("/upload/", "/upload/fl_inline/")
-                    : `${process.env.REACT_APP_API_URL || "http://localhost:3001/api"}/lessons/${lessonId}/resources/${preview._id}/download`
-                }
-                style={{width:"100%",height:"100%",border:"none",borderRadius:8,background:"#fff"}}
-                title={preview.name}
-              />
-            ) :
-            // Video Preview
-            (preview.type === "video" ? (
-              <video controls autoPlay style={{maxWidth:"100%",maxHeight:"100%",borderRadius:8,background:"#000"}}>
-                <source src={preview.url}/> Your browser does not support video.
-              </video>
-            ) :
-            // Image Preview (no fl_inline)
-            (preview.type === "image" && preview.url ? (
-              <img src={preview.url} alt={preview.name} style={{maxWidth:"100%",maxHeight:"80vh",borderRadius:8,background:"#fff",boxShadow:"0 8px 32px rgba(0,0,0,0.2)"}} />
-            ) :
-            // Fallback for other types
-            (
-              <div style={{textAlign:"center",color:"#fff"}}>
-                <p style={{marginBottom:16,color:"#94A3B8"}}>No preview for this file type.</p>
-                <a href={preview.url} target="_blank" rel="noreferrer" style={{padding:"10px 20px",background:"#2563EB",color:"#fff",borderRadius:8,textDecoration:"none"}}>Open File</a>
-              </div>
-            )))}
+            {(() => {
+              if (preview.type === "pdf") {
+                return (
+                  <iframe 
+                    src={preview.url && preview.url.includes("cloudinary") 
+                      ? preview.url.replace("/upload/", "/upload/fl_inline/") 
+                      : `${process.env.REACT_APP_API_URL || "http://localhost:3001/api"}/lessons/${lessonId}/resources/${preview._id}/download`
+                    } 
+                    style={{width:"100%",height:"100%",border:"none",borderRadius:8,background:"#fff"}} 
+                    title={preview.name}
+                  />
+                );
+              }
+              if (preview.type === "video") {
+                return (
+                  <video controls autoPlay style={{maxWidth:"100%",maxHeight:"100%",borderRadius:8,background:"#000"}}>
+                    <source src={preview.url}/> Your browser does not support video.
+                  </video>
+                );
+              }
+              if (preview.type === "image" && preview.url) {
+                return <img src={preview.url} alt={preview.name} style={{maxWidth:"100%",maxHeight:"80vh",borderRadius:8,background:"#fff",boxShadow:"0 8px 32px rgba(0,0,0,0.2)"}} />;
+              }
+              return (
+                <div style={{textAlign:"center",color:"#fff"}}>
+                  <p style={{marginBottom:16,color:"#94A3B8"}}>No preview for this file type.</p>
+                  <a href={preview.url} target="_blank" rel="noreferrer" style={{padding:"10px 20px",background:"#2563EB",color:"#fff",borderRadius:8,textDecoration:"none"}}>Open File</a>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}
