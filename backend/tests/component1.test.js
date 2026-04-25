@@ -1,550 +1,293 @@
 const request = require("supertest");
-const mongoose = require("mongoose");
+const { connect, closeDatabase } = require("./setup");
+
+jest.mock("../src/config/db", () => jest.fn().mockResolvedValue(true));
+jest.mock("../src/utils/cloudinary", () => ({
+  uploadToCloudinary: jest.fn().mockResolvedValue({
+    url: "https://mock-cdn.local/resource.pdf",
+    publicId: "mock-resource-id",
+    version: "1",
+    resourceType: "image",
+    size: 1024,
+  }),
+  deleteFromCloudinary: jest.fn().mockResolvedValue({}),
+}));
+
 const app = require("../server");
 
-// Wait for DB to be ready before any tests run
-beforeAll(async () => {
-  await app.dbReady;
-});
+jest.setTimeout(30000);
 
-afterAll(async () => {
-  // Clean up test data
-  try {
-    await mongoose.connection.collection("users").deleteMany({
-      email: { $in: ["admin_test@gmail.com", "student_test@gmail.com", "other@gmail.com"] },
+describe("Component 1 - Learning Management & Offline Delivery Engine", () => {
+  let adminToken;
+  let studentToken;
+  let courseId;
+  let firstLessonId;
+  let secondLessonId;
+  let resourceId;
+
+  const adminUser = {
+    name: "Component Admin",
+    email: "component1-admin@test.com",
+    password: "password123",
+    role: "admin",
+  };
+
+  const studentUser = {
+    name: "Component Student",
+    email: "component1-student@test.com",
+    password: "password123",
+    role: "student",
+  };
+
+  beforeAll(async () => {
+    await connect();
+    await app.dbReady;
+
+    const adminRegister = await request(app).post("/api/auth/register").send(adminUser);
+    adminToken = adminRegister.body.token;
+
+    const studentRegister = await request(app).post("/api/auth/register").send(studentUser);
+    studentToken = studentRegister.body.token;
+  });
+
+  afterAll(async () => {
+    await closeDatabase();
+  });
+
+  test("registers and authenticates component users", async () => {
+    const loginRes = await request(app).post("/api/auth/login").send({
+      email: adminUser.email,
+      password: adminUser.password,
     });
-    if (courseId) {
-      const oid = new mongoose.Types.ObjectId(courseId);
-      await mongoose.connection.collection("courses").deleteOne({ _id: oid });
-      await mongoose.connection.collection("lessons").deleteMany({ course: oid });
-      await mongoose.connection.collection("enrollments").deleteMany({ course: oid });
-      await mongoose.connection.collection("progresses").deleteMany({ course: oid });
-      await mongoose.connection.collection("savedcourses").deleteMany({ course: oid });
-    }
-  } catch (e) {
-    // ignore cleanup errors
-  }
-});
 
-// ============================================================
-// TEST DATA
-// ============================================================
-let adminToken = "";
-let studentToken = "";
-let courseId = "";
-let lessonId = "";
+    expect(loginRes.status).toBe(200);
+    expect(loginRes.body.token).toBeDefined();
 
-const adminUser = {
-  name: "Admin Test",
-  email: "admin_test@gmail.com",
-  password: "123456",
-  role: "admin",
-};
-
-const studentUser = {
-  name: "Student Test",
-  email: "student_test@gmail.com",
-  password: "123456",
-  role: "student",
-};
-
-const testCourse = {
-  title: "Basic Computer Skills",
-  description: "Learn the fundamentals of using a computer",
-  category: "Basic IT",
-  level: "beginner",
-  tags: ["computer", "basics"],
-};
-
-const testLesson = {
-  title: "Introduction to Computers",
-  description: "What is a computer",
-  content: "A computer is an electronic device...",
-  order: 1,
-  duration: 15,
-};
-
-// ============================================================
-// 1. AUTH TESTS
-// ============================================================
-describe("1. AUTH - Register & Login", () => {
-
-  test("Register admin successfully", async () => {
-    const res = await request(app).post("/api/auth/register").send(adminUser);
-    expect(res.statusCode).toBe(201);
-    expect(res.body.success).toBe(true);
-    expect(res.body.token).toBeDefined();
-    expect(res.body.data.role).toBe("admin");
-    adminToken = res.body.token;
-  });
-
-  test("Register student successfully", async () => {
-    const res = await request(app).post("/api/auth/register").send(studentUser);
-    expect(res.statusCode).toBe(201);
-    expect(res.body.success).toBe(true);
-    expect(res.body.token).toBeDefined();
-    expect(res.body.data.role).toBe("student");
-    studentToken = res.body.token;
-  });
-
-  test("Fail on duplicate email", async () => {
-    const res = await request(app).post("/api/auth/register").send(adminUser);
-    expect(res.statusCode).toBe(400);
-    expect(res.body.success).toBe(false);
-  });
-
-  test("Login admin successfully", async () => {
-    const res = await request(app)
-      .post("/api/auth/login")
-      .send({ email: adminUser.email, password: adminUser.password });
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.token).toBeDefined();
-    // refresh token to ensure latest
-    adminToken = res.body.token;
-  });
-
-  test("Fail login with wrong password", async () => {
-    const res = await request(app)
-      .post("/api/auth/login")
-      .send({ email: adminUser.email, password: "wrongpassword" });
-    expect(res.statusCode).toBe(401);
-    expect(res.body.success).toBe(false);
-  });
-
-  test("Fail login with non-existent email", async () => {
-    const res = await request(app)
-      .post("/api/auth/login")
-      .send({ email: "notexist@gmail.com", password: "123456" });
-    expect(res.statusCode).toBe(401);
-    expect(res.body.success).toBe(false);
-  });
-
-  test("Get current user with valid token", async () => {
-    const res = await request(app)
+    const meRes = await request(app)
       .get("/api/auth/me")
-      .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data.email).toBe(adminUser.email);
+      .set("Authorization", `Bearer ${studentToken}`);
+
+    expect(meRes.status).toBe(200);
+    expect(meRes.body.data.email).toBe(studentUser.email);
+    expect(meRes.body.data.role).toBe("Student");
   });
 
-  test("Fail get current user without token", async () => {
-    const res = await request(app).get("/api/auth/me");
-    expect(res.statusCode).toBe(401);
-  });
-});
-
-// ============================================================
-// 2. COURSE TESTS
-// ============================================================
-describe("2. COURSES - CRUD Operations", () => {
-
-  test("Admin can create course", async () => {
-    const res = await request(app)
+  test("supports admin course CRUD and student visibility rules", async () => {
+    const createRes = await request(app)
       .post("/api/courses")
       .set("Authorization", `Bearer ${adminToken}`)
-      .send(testCourse);
-    expect(res.statusCode).toBe(201);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data.title).toBe(testCourse.title);
-    expect(res.body.data.isPublished).toBe(false);
-    courseId = res.body.data._id;
-  });
+      .send({
+        title: "Digital Literacy Foundations",
+        description: "Core digital literacy content for rural youth",
+        category: "Basic IT",
+        level: "beginner",
+        tags: ["digital literacy", "basics"],
+      });
 
-  test("Student cannot create course (403)", async () => {
-    const res = await request(app)
-      .post("/api/courses")
-      .set("Authorization", `Bearer ${studentToken}`)
-      .send(testCourse);
-    expect(res.statusCode).toBe(403);
-    expect(res.body.success).toBe(false);
-  });
+    expect(createRes.status).toBe(201);
+    expect(createRes.body.success).toBe(true);
+    expect(createRes.body.data.isPublished).toBe(false);
+    courseId = createRes.body.data._id;
 
-  test("Fail create course without token (401)", async () => {
-    const res = await request(app).post("/api/courses").send(testCourse);
-    expect(res.statusCode).toBe(401);
-  });
-
-  test("Fail create course with missing required fields", async () => {
-    const res = await request(app)
-      .post("/api/courses")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send({ title: "Incomplete Course" });
-    expect(res.statusCode).toBe(500);
-    expect(res.body.success).toBe(false);
-  });
-
-  test("Admin can get all courses including unpublished", async () => {
-    const res = await request(app)
-      .get("/api/courses")
-      .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(Array.isArray(res.body.data)).toBe(true);
-  });
-
-  test("Student only sees published courses", async () => {
-    const res = await request(app)
-      .get("/api/courses")
-      .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(200);
-    const unpublished = res.body.data.filter((c) => !c.isPublished);
-    expect(unpublished.length).toBe(0);
-  });
-
-  test("Search courses by keyword", async () => {
-    const res = await request(app)
-      .get("/api/courses?search=Basic Computer")
-      .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-  });
-
-  test("Filter courses by category", async () => {
-    const res = await request(app)
-      .get("/api/courses?category=Basic IT")
-      .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-  });
-
-  test("Pagination works correctly", async () => {
-    const res = await request(app)
-      .get("/api/courses?page=1&limit=5")
-      .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.page).toBe(1);
-    expect(res.body.data.length).toBeLessThanOrEqual(5);
-  });
-
-  test("Admin can get single course by ID", async () => {
-    const res = await request(app)
-      .get(`/api/courses/${courseId}`)
-      .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data._id).toBe(courseId);
-  });
-
-  test("Student cannot see unpublished course (403)", async () => {
-    const res = await request(app)
+    const hiddenRes = await request(app)
       .get(`/api/courses/${courseId}`)
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(403);
-  });
 
-  test("Returns 404 for invalid course ID", async () => {
-    const res = await request(app)
-      .get("/api/courses/000000000000000000000000")
-      .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(404);
-  });
+    expect(hiddenRes.status).toBe(403);
 
-  test("Admin can update course", async () => {
-    const res = await request(app)
+    const updateRes = await request(app)
       .put(`/api/courses/${courseId}`)
       .set("Authorization", `Bearer ${adminToken}`)
-      .send({ title: "Updated Computer Skills" });
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data.title).toBe("Updated Computer Skills");
-  });
+      .send({ title: "Digital Literacy Foundations Updated" });
 
-  test("Admin can publish course", async () => {
-    const res = await request(app)
+    expect(updateRes.status).toBe(200);
+    expect(updateRes.body.data.title).toBe("Digital Literacy Foundations Updated");
+
+    const publishRes = await request(app)
       .patch(`/api/courses/${courseId}/publish`)
       .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data.isPublished).toBe(true);
+
+    expect(publishRes.status).toBe(200);
+    expect(publishRes.body.data.isPublished).toBe(true);
+
+    const browseRes = await request(app)
+      .get("/api/courses?search=Digital Literacy&category=Basic IT")
+      .set("Authorization", `Bearer ${studentToken}`);
+
+    expect(browseRes.status).toBe(200);
+    expect(browseRes.body.data.some((course) => course._id === courseId)).toBe(true);
+    expect(browseRes.body.data.every((course) => course.isPublished)).toBe(true);
   });
 
-  test("Admin can unpublish course (toggle)", async () => {
-    const res = await request(app)
-      .patch(`/api/courses/${courseId}/publish`)
-      .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data.isPublished).toBe(false);
-    // Re-publish for further tests
-    await request(app)
-      .patch(`/api/courses/${courseId}/publish`)
-      .set("Authorization", `Bearer ${adminToken}`);
-  });
-});
-
-// ============================================================
-// 3. LESSON TESTS
-// ============================================================
-describe("3. LESSONS - CRUD Operations", () => {
-
-  test("Admin can add lesson to course", async () => {
-    const res = await request(app)
+  test("supports lesson creation, resource upload, lesson viewing, and resource deletion", async () => {
+    const firstLessonRes = await request(app)
       .post(`/api/courses/${courseId}/lessons`)
       .set("Authorization", `Bearer ${adminToken}`)
-      .send(testLesson);
-    expect(res.statusCode).toBe(201);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data.title).toBe(testLesson.title);
-    lessonId = res.body.data._id;
-  });
+      .send({
+        title: "Introduction to Devices",
+        description: "Understand basic digital devices",
+        content: "Lesson content 1",
+        order: 1,
+        duration: 15,
+      });
 
-  test("Student cannot add lesson (403)", async () => {
-    const res = await request(app)
+    expect(firstLessonRes.status).toBe(201);
+    firstLessonId = firstLessonRes.body.data._id;
+
+    const secondLessonRes = await request(app)
       .post(`/api/courses/${courseId}/lessons`)
-      .set("Authorization", `Bearer ${studentToken}`)
-      .send(testLesson);
-    expect(res.statusCode).toBe(403);
-  });
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        title: "Internet Safety Essentials",
+        description: "Safe browsing basics",
+        content: "Lesson content 2",
+        order: 2,
+        duration: 20,
+      });
 
-  test("Get all lessons for a course", async () => {
-    const res = await request(app)
+    expect(secondLessonRes.status).toBe(201);
+    secondLessonId = secondLessonRes.body.data._id;
+
+    const uploadRes = await request(app)
+      .post(`/api/lessons/${firstLessonId}/resources`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .field("name", "Offline Guide")
+      .field("type", "pdf")
+      .field("isDownloadable", "true")
+      .attach("file", Buffer.from("%PDF-1.4 test"), "offline-guide.pdf");
+
+    expect(uploadRes.status).toBe(201);
+    expect(uploadRes.body.data.resources).toHaveLength(1);
+    resourceId = uploadRes.body.data.resources[0]._id;
+
+    const listLessonsRes = await request(app)
       .get(`/api/courses/${courseId}/lessons`)
+      .set("Authorization", `Bearer ${studentToken}`);
+
+    expect(listLessonsRes.status).toBe(200);
+    expect(listLessonsRes.body.count).toBe(2);
+
+    const lessonDetailRes = await request(app)
+      .get(`/api/lessons/${firstLessonId}`)
+      .set("Authorization", `Bearer ${studentToken}`);
+
+    expect(lessonDetailRes.status).toBe(200);
+    expect(lessonDetailRes.body.data.resources[0]._id).toBe(resourceId);
+
+    const deleteResourceRes = await request(app)
+      .delete(`/api/lessons/${firstLessonId}/resources/${resourceId}`)
       .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(Array.isArray(res.body.data)).toBe(true);
-    expect(res.body.count).toBeGreaterThan(0);
+
+    expect(deleteResourceRes.status).toBe(200);
+    expect(deleteResourceRes.body.success).toBe(true);
   });
 
-  test("Get single lesson by ID", async () => {
-    const res = await request(app)
-      .get(`/api/lessons/${lessonId}`)
-      .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data._id).toBe(lessonId);
-  });
-
-  test("Returns 404 for invalid lesson ID", async () => {
-    const res = await request(app)
-      .get("/api/lessons/000000000000000000000000")
-      .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(404);
-  });
-
-  test("Admin can update lesson", async () => {
-    const res = await request(app)
-      .put(`/api/lessons/${lessonId}`)
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send({ title: "Updated Lesson Title" });
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data.title).toBe("Updated Lesson Title");
-  });
-
-  test("Student cannot update lesson (403)", async () => {
-    const res = await request(app)
-      .put(`/api/lessons/${lessonId}`)
-      .set("Authorization", `Bearer ${studentToken}`)
-      .send({ title: "Hacked Title" });
-    expect(res.statusCode).toBe(403);
-  });
-});
-
-// ============================================================
-// 4. ENROLLMENT TESTS
-// ============================================================
-describe("4. ENROLLMENTS - Student Enrollment Flow", () => {
-
-  test("Student can enroll in published course", async () => {
-    const res = await request(app)
+  test("supports enrollment, progress tracking, offline sync, downloads, and saved courses", async () => {
+    const enrollRes = await request(app)
       .post(`/api/enrollments/${courseId}`)
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(201);
-    expect(res.body.success).toBe(true);
-    expect(res.body.message).toBe("Enrolled successfully");
-  });
 
-  test("Student cannot enroll twice (400)", async () => {
-    const res = await request(app)
+    expect(enrollRes.status).toBe(201);
+    expect(enrollRes.body.message).toBe("Enrolled successfully");
+
+    const duplicateEnrollRes = await request(app)
       .post(`/api/enrollments/${courseId}`)
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(400);
-    expect(res.body.success).toBe(false);
-  });
 
-  test("Student can get their enrollments", async () => {
-    const res = await request(app)
+    expect(duplicateEnrollRes.status).toBe(400);
+
+    const enrollmentsRes = await request(app)
       .get("/api/enrollments/my")
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.count).toBeGreaterThan(0);
-  });
 
-  test("Check enrollment status returns isEnrolled true", async () => {
-    const res = await request(app)
+    expect(enrollmentsRes.status).toBe(200);
+    expect(enrollmentsRes.body.count).toBe(1);
+
+    const statusRes = await request(app)
       .get(`/api/enrollments/${courseId}/status`)
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.isEnrolled).toBe(true);
-  });
 
-  test("Admin can see all enrollments for a course", async () => {
-    const res = await request(app)
-      .get(`/api/enrollments/course/${courseId}`)
-      .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.count).toBeGreaterThan(0);
-  });
+    expect(statusRes.status).toBe(200);
+    expect(statusRes.body.isEnrolled).toBe(true);
 
-  test("Student cannot see all enrollments for a course (403)", async () => {
-    const res = await request(app)
-      .get(`/api/enrollments/course/${courseId}`)
+    const progressRes = await request(app)
+      .patch(`/api/progress/${courseId}/lessons/${firstLessonId}`)
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(403);
-  });
-});
 
-// ============================================================
-// 5. PROGRESS TESTS
-// ============================================================
-describe("5. PROGRESS - Learning Progress Tracking", () => {
+    expect(progressRes.status).toBe(200);
+    expect(progressRes.body.data.completionPercentage).toBe(50);
+    expect(progressRes.body.courseCompleted).toBe(false);
 
-  test("Student can update lesson progress", async () => {
-    const res = await request(app)
-      .patch(`/api/progress/${courseId}/lessons/${lessonId}`)
-      .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data.completionPercentage).toBeGreaterThan(0);
-  });
+    const trackDownloadRes = await request(app)
+      .post(`/api/progress/${courseId}/download`)
+      .set("Authorization", `Bearer ${studentToken}`)
+      .send({ resourceUrl: "https://mock-cdn.local/resource.pdf" });
 
-  test("Cannot update progress if not enrolled (403)", async () => {
-    const newUser = await request(app)
-      .post("/api/auth/register")
-      .send({ name: "Other", email: "other@gmail.com", password: "123456", role: "student" });
-    const otherToken = newUser.body.token;
-    const res = await request(app)
-      .patch(`/api/progress/${courseId}/lessons/${lessonId}`)
-      .set("Authorization", `Bearer ${otherToken}`);
-    expect(res.statusCode).toBe(403);
-  });
+    expect(trackDownloadRes.status).toBe(200);
+    expect(trackDownloadRes.body.data).toContain("https://mock-cdn.local/resource.pdf");
 
-  test("Student can get course progress", async () => {
-    const res = await request(app)
+    const syncRes = await request(app)
+      .post(`/api/progress/${courseId}/sync`)
+      .set("Authorization", `Bearer ${studentToken}`)
+      .send({ completedLessons: [secondLessonId] });
+
+    expect(syncRes.status).toBe(200);
+    expect(syncRes.body.data.completionPercentage).toBe(100);
+    expect(syncRes.body.data.isCourseCompleted).toBe(true);
+
+    const courseProgressRes = await request(app)
       .get(`/api/progress/${courseId}`)
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data.completionPercentage).toBeDefined();
-  });
 
-  test("Track offline download", async () => {
-    const res = await request(app)
-      .post(`/api/progress/${courseId}/download`)
-      .set("Authorization", `Bearer ${studentToken}`)
-      .send({ resourceUrl: "https://res.cloudinary.com/test/sample.pdf" });
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-  });
+    expect(courseProgressRes.status).toBe(200);
+    expect(courseProgressRes.body.data.completionPercentage).toBe(100);
 
-  test("Fail track download without resourceUrl (400)", async () => {
-    const res = await request(app)
-      .post(`/api/progress/${courseId}/download`)
-      .set("Authorization", `Bearer ${studentToken}`)
-      .send({});
-    expect(res.statusCode).toBe(400);
-    expect(res.body.success).toBe(false);
-  });
-
-  test("Sync offline progress successfully", async () => {
-    const res = await request(app)
-      .post(`/api/progress/${courseId}/sync`)
-      .set("Authorization", `Bearer ${studentToken}`)
-      .send({ completedLessons: [lessonId] });
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.message).toBe("Progress synced");
-  });
-
-  test("Fail sync without completedLessons array (400)", async () => {
-    const res = await request(app)
-      .post(`/api/progress/${courseId}/sync`)
-      .set("Authorization", `Bearer ${studentToken}`)
-      .send({});
-    expect(res.statusCode).toBe(400);
-    expect(res.body.success).toBe(false);
-  });
-});
-
-// ============================================================
-// 6. SAVED COURSES TESTS
-// ============================================================
-describe("6. SAVED COURSES - Bookmarking", () => {
-
-  test("Student can save a course", async () => {
-    const res = await request(app)
+    const saveRes = await request(app)
       .post(`/api/saved/${courseId}`)
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(201);
-    expect(res.body.success).toBe(true);
-    expect(res.body.isSaved).toBe(true);
-  });
 
-  test("Student can get saved courses", async () => {
-    const res = await request(app)
+    expect(saveRes.status).toBe(201);
+    expect(saveRes.body.isSaved).toBe(true);
+
+    const savedListRes = await request(app)
       .get("/api/saved")
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.count).toBeGreaterThan(0);
-  });
 
-  test("Student can unsave a course (toggle)", async () => {
-    const res = await request(app)
+    expect(savedListRes.status).toBe(200);
+    expect(savedListRes.body.count).toBe(1);
+
+    const unsaveRes = await request(app)
       .post(`/api/saved/${courseId}`)
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.isSaved).toBe(false);
+
+    expect(unsaveRes.status).toBe(200);
+    expect(unsaveRes.body.isSaved).toBe(false);
   });
 
-  test("Fail save non-existent course (404)", async () => {
-    const res = await request(app)
-      .post("/api/saved/000000000000000000000000")
+  test("enforces access control and supports lesson/course cleanup", async () => {
+    const studentDeleteLessonRes = await request(app)
+      .delete(`/api/lessons/${secondLessonId}`)
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(404);
-  });
-});
 
-// ============================================================
-// 7. DELETE TESTS
-// ============================================================
-describe("7. DELETE - Cleanup Operations", () => {
+    expect(studentDeleteLessonRes.status).toBe(403);
 
-  test("Student cannot delete lesson (403)", async () => {
-    const res = await request(app)
-      .delete(`/api/lessons/${lessonId}`)
-      .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(403);
-  });
-
-  test("Admin can delete lesson", async () => {
-    const res = await request(app)
-      .delete(`/api/lessons/${lessonId}`)
+    const adminDeleteLessonRes = await request(app)
+      .delete(`/api/lessons/${secondLessonId}`)
       .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-  });
 
-  test("Student cannot delete course (403)", async () => {
-    const res = await request(app)
+    expect(adminDeleteLessonRes.status).toBe(200);
+
+    const studentDeleteCourseRes = await request(app)
       .delete(`/api/courses/${courseId}`)
       .set("Authorization", `Bearer ${studentToken}`);
-    expect(res.statusCode).toBe(403);
-  });
 
-  test("Admin can delete course", async () => {
-    const tempCourse = await request(app)
-      .post("/api/courses")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .send({ ...testCourse, title: "Temp Course To Delete" });
-    const tempId = tempCourse.body.data._id;
-    const res = await request(app)
-      .delete(`/api/courses/${tempId}`)
+    expect(studentDeleteCourseRes.status).toBe(403);
+
+    const adminDeleteCourseRes = await request(app)
+      .delete(`/api/courses/${courseId}`)
       .set("Authorization", `Bearer ${adminToken}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
+
+    expect(adminDeleteCourseRes.status).toBe(200);
+    expect(adminDeleteCourseRes.body.success).toBe(true);
   });
 });

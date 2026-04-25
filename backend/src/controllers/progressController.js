@@ -5,6 +5,49 @@ const { handleCourseCompletion } = require("./gamificationController");
 const EventEmitter = require("events");
 const progressEvents = new EventEmitter();
 
+const emitProgressUpdated = (studentId, courseId, progress) => {
+  progressEvents.emit("progressUpdated", {
+    studentId,
+    courseId,
+    completionPercentage: progress.completionPercentage,
+    completedLessons: progress.completedLessons,
+    isCourseCompleted: progress.isCourseCompleted,
+  });
+};
+
+const syncEnrollmentCompletion = async ({ enrollment, progress, courseId, studentId }) => {
+  if (!enrollment) return;
+
+  if (progress.completionPercentage === 100) {
+    if (!progress.isCourseCompleted) {
+      progress.isCourseCompleted = true;
+      progress.courseCompletedAt = progress.courseCompletedAt || Date.now();
+      enrollment.completionStatus = "completed";
+      enrollment.completedAt = progress.courseCompletedAt;
+      await enrollment.save();
+      await handleCourseCompletion(
+        { body: { studentId, courseId } },
+        { status: () => ({ json: () => {} }) }
+      );
+      progressEvents.emit("courseCompleted", { studentId, courseId });
+      return;
+    }
+
+    if (enrollment.completionStatus !== "completed") {
+      enrollment.completionStatus = "completed";
+      enrollment.completedAt = progress.courseCompletedAt || enrollment.completedAt || Date.now();
+      await enrollment.save();
+    }
+    return;
+  }
+
+  if (progress.completedLessons.length > 0) {
+    enrollment.completionStatus = "in_progress";
+    enrollment.completedAt = undefined;
+    await enrollment.save();
+  }
+};
+
 const updateLessonProgress = async (req, res) => {
   try {
     const { courseId, lessonId } = req.params;
@@ -25,19 +68,9 @@ const updateLessonProgress = async (req, res) => {
     if (lessonCompleted) {
       progressEvents.emit("lessonCompleted", { studentId: req.user._id, courseId, lessonId });
     }
-    if (progress.completionPercentage === 100 && !progress.isCourseCompleted) {
-      progress.isCourseCompleted = true;
-      progress.courseCompletedAt = Date.now();
-      enrollment.completionStatus = "completed";
-      enrollment.completedAt = Date.now();
-      await enrollment.save();
-      await handleCourseCompletion({ body: { studentId: req.user._id, courseId } }, { status: () => ({ json: () => {} }) });
-      progressEvents.emit("courseCompleted", { studentId: req.user._id, courseId });
-    } else if (progress.completedLessons.length > 0) {
-      enrollment.completionStatus = "in_progress";
-      await enrollment.save();
-    }
+    await syncEnrollmentCompletion({ enrollment, progress, courseId, studentId: req.user._id });
     await progress.save();
+    emitProgressUpdated(req.user._id, courseId, progress);
     res.status(200).json({ success: true, data: progress, courseCompleted: progress.isCourseCompleted });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -78,20 +111,53 @@ const syncOfflineProgress = async (req, res) => {
     if (!completedLessons || !Array.isArray(completedLessons)) {
       return res.status(400).json({ success: false, message: "completedLessons array required" });
     }
+    const enrollment = await Enrollment.findOne({
+      student: req.user._id,
+      course: req.params.courseId,
+      isActive: true,
+    });
+    if (!enrollment) {
+      return res.status(403).json({ success: false, message: "Not enrolled in this course" });
+    }
+
     let progress = await Progress.findOne({ student: req.user._id, course: req.params.courseId });
-    if (!progress) return res.status(404).json({ success: false, message: "Progress not found" });
+    if (!progress) {
+      progress = await Progress.create({ student: req.user._id, course: req.params.courseId });
+    }
+
+    const newlyCompletedLessons = [];
     for (const lessonId of completedLessons) {
-      if (!progress.completedLessons.includes(lessonId)) progress.completedLessons.push(lessonId);
+      if (!progress.completedLessons.includes(lessonId)) {
+        progress.completedLessons.push(lessonId);
+        newlyCompletedLessons.push(lessonId);
+      }
+    }
+
+    if (completedLessons.length > 0) {
+      progress.lastAccessedLesson = completedLessons[completedLessons.length - 1];
     }
     const course = await Course.findById(req.params.courseId);
     progress.completionPercentage = course.totalLessons > 0
       ? Math.round((progress.completedLessons.length / course.totalLessons) * 100) : 0;
-    if (progress.completionPercentage === 100) {
-      progress.isCourseCompleted = true;
-      progress.courseCompletedAt = progress.courseCompletedAt || Date.now();
+
+    for (const lessonId of newlyCompletedLessons) {
+      progressEvents.emit("lessonCompleted", {
+        studentId: req.user._id,
+        courseId: req.params.courseId,
+        lessonId,
+      });
     }
+
+    await syncEnrollmentCompletion({
+      enrollment,
+      progress,
+      courseId: req.params.courseId,
+      studentId: req.user._id,
+    });
+
     progress.lastAccessedAt = Date.now();
     await progress.save();
+    emitProgressUpdated(req.user._id, req.params.courseId, progress);
     res.status(200).json({ success: true, message: "Progress synced", data: progress });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

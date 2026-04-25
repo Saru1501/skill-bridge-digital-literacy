@@ -19,6 +19,8 @@ scenarios:
     flow:
       - get:
           url: "/api/courses"
+          headers:
+            Authorization: "Bearer {{ token }}"
           name: "Browse Catalogue"
       - post:
           url: "/api/enrollments/{{ courseId }}"
@@ -46,3 +48,15 @@ scenarios:
             completedLessons: ["{{ lessonId }}"]
           name: "Offline Batch Sync"
           ifTrue: "lessonId"
+      - get:
+          url: "/api/progress/{{ courseId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          name: "Fetch Course Progress"
+          ifTrue: "courseId"
+      - post:
+          url: "/api/saved/{{ courseId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          name: "Toggle Saved Course"
+          ifTrue: "courseId"

@@ -42,7 +42,7 @@ const enrollCourse = async (req, res) => {
       await Progress.findOneAndUpdate(
         { student: studentId, course: courseId },
         { $setOnInsert: { student: studentId, course: courseId } },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
       );
     }
 
